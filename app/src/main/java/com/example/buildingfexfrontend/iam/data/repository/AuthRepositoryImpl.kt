@@ -8,7 +8,6 @@ import com.example.buildingfexfrontend.iam.data.remote.AuthApi
 import com.example.buildingfexfrontend.iam.data.remote.FinanceSettingsSeed
 import com.example.buildingfexfrontend.iam.data.remote.KpiSeed
 import com.example.buildingfexfrontend.iam.data.remote.RegisterAdminBody
-import com.example.buildingfexfrontend.iam.data.remote.SetCredentialsBody
 import com.example.buildingfexfrontend.iam.data.remote.SignInBody
 import com.example.buildingfexfrontend.iam.domain.repository.AuthRepository
 import com.example.buildingfexfrontend.iam.domain.repository.AuthResult
@@ -52,18 +51,6 @@ class AuthRepositoryImpl(
         ).toPair()
         seedAdminDefaults(profile.id, token)
         AuthResult(profile, token)
-    }
-
-    override suspend fun findResidentByInviteCode(code: String): UserProfile = apiCall {
-        api.findResidentInvite(code).toDomain()
-    }
-
-    override suspend fun setResidentCredentials(
-        code: String,
-        email: String,
-        password: String,
-    ): AuthResult = apiCall {
-        api.setResidentCredentials(SetCredentialsBody(code, email, password)).toPair().toAuthResult()
     }
 
     override suspend fun getProfileById(userId: String): UserProfile? = try {

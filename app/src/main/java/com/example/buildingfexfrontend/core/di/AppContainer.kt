@@ -8,10 +8,8 @@ import com.example.buildingfexfrontend.core.data.session.SessionRepositoryImpl
 import com.example.buildingfexfrontend.core.domain.repository.SessionRepository
 import com.example.buildingfexfrontend.finances.application.CollectionsUseCases
 import com.example.buildingfexfrontend.finances.application.FinanceUseCases
-import com.example.buildingfexfrontend.finances.application.ResidentFinanceUseCases
 import com.example.buildingfexfrontend.finances.data.repository.CollectionsRepositoryImpl
 import com.example.buildingfexfrontend.finances.data.repository.FinancesRepositoryImpl
-import com.example.buildingfexfrontend.finances.data.repository.MercadoPagoGatewayImpl
 import com.example.buildingfexfrontend.iam.application.AuthUseCases
 import com.example.buildingfexfrontend.iam.data.repository.AuthRepositoryImpl
 import com.example.buildingfexfrontend.imports.application.ImportsUseCases
@@ -71,14 +69,6 @@ class AppContainer(context: Context) {
         )
     }
 
-    val residentFinance: ResidentFinanceUseCases by lazy {
-        ResidentFinanceUseCases(
-            repository = FinancesRepositoryImpl(network.service(), session),
-            payments = MercadoPagoGatewayImpl(network.service(), session),
-            session = session,
-        )
-    }
-
     val collections: CollectionsUseCases by lazy {
         CollectionsUseCases(
             repository = CollectionsRepositoryImpl(network.service(), session),
@@ -87,7 +77,7 @@ class AppContainer(context: Context) {
     }
 
     val incidents: IncidentsUseCases by lazy {
-        IncidentsUseCases(IncidentsRepositoryImpl(network.service(), session), session)
+        IncidentsUseCases(IncidentsRepositoryImpl(network.service(), session))
     }
 
     val announcements: AnnouncementsUseCases by lazy {
@@ -103,7 +93,7 @@ class AppContainer(context: Context) {
     }
 
     val reservations: ReservationsUseCases by lazy {
-        ReservationsUseCases(ReservationsRepositoryImpl(network.service(), session), session)
+        ReservationsUseCases(ReservationsRepositoryImpl(network.service(), session))
     }
 
     val support: SupportUseCases by lazy {

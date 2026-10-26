@@ -16,7 +16,7 @@ val ShellTexts: Map<String, TextPair> = mapOf(
     "shell.nav.admin_spaces" to ("Espacios sociales" to "Social spaces"),
     "shell.nav.imports" to ("Importación" to "Import"),
     "shell.nav.finances" to ("Finanzas" to "Finances"),
-    "shell.nav.generation" to ("Generación" to "Billing run"),
+    "shell.nav.generation" to ("Reservas" to "Reservations"),
     "shell.nav.incidents" to ("Incidencias" to "Incidents"),
     "shell.nav.information" to ("Información" to "Announcements"),
     "shell.nav.admin_support" to ("Ayuda a residentes" to "Resident support"),

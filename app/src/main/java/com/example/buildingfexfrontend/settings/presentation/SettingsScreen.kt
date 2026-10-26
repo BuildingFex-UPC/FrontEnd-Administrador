@@ -72,9 +72,7 @@ fun SettingsScreen(container: AppContainer) {
             state.loadError != null -> ErrorState(state.loadError!!, onRetry = viewModel::load)
             else -> {
                 val profile = state.profile
-                SectionCard(
-                    title = if (state.isAdmin) string("set.profile.adminTitle") else string("set.profile.title"),
-                ) {
+                SectionCard(title = string("set.profile.adminTitle")) {
                     if (profile == null) {
                         Text(
                             text = string("set.profile.loadFailed"),
@@ -86,59 +84,52 @@ fun SettingsScreen(container: AppContainer) {
                         profile.email?.takeIf { it.isNotBlank() }?.let {
                             KeyValue(label = string("set.profile.email"), value = it)
                         }
-                        if (state.isAdmin) {
-                            profile.dni?.takeIf { it.isNotBlank() }?.let { KeyValue(label = string("set.profile.dni"), value = it) }
-                            profile.address?.takeIf { it.isNotBlank() }?.let { KeyValue(label = string("set.profile.address"), value = it) }
-                            profile.company?.takeIf { it.isNotBlank() }?.let { KeyValue(label = string("set.profile.company"), value = it) }
-                            profile.ruc?.takeIf { it.isNotBlank() }?.let { KeyValue(label = string("set.profile.ruc"), value = it) }
-                        } else {
-                            profile.code?.takeIf { it.isNotBlank() }?.let { KeyValue(label = string("set.profile.department"), value = it) }
-                            profile.floor?.takeIf { it.isNotBlank() }?.let { KeyValue(label = string("set.profile.floor"), value = it) }
-                        }
+                        profile.dni?.takeIf { it.isNotBlank() }?.let { KeyValue(label = string("set.profile.dni"), value = it) }
+                        profile.address?.takeIf { it.isNotBlank() }?.let { KeyValue(label = string("set.profile.address"), value = it) }
+                        profile.company?.takeIf { it.isNotBlank() }?.let { KeyValue(label = string("set.profile.company"), value = it) }
+                        profile.ruc?.takeIf { it.isNotBlank() }?.let { KeyValue(label = string("set.profile.ruc"), value = it) }
                     }
                 }
 
-                if (state.isAdmin) {
-                    VerticalGap(16)
-                    val subscription = state.subscription
-                    SectionCard(title = string("set.plans.title")) {
+                VerticalGap(16)
+                val subscription = state.subscription
+                SectionCard(title = string("set.plans.title")) {
+                    Text(
+                        text = string("set.plans.residents")
+                            .replace("{current}", (subscription?.residentsCount ?: 0).toString())
+                            .replace(
+                                "{limit}",
+                                (subscription?.residentLimit ?: SubscriptionPlan.FREE.residentLimit).toString(),
+                            ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    state.message?.let {
+                        VerticalGap(8)
                         Text(
-                            text = string("set.plans.residents")
-                                .replace("{current}", (subscription?.residentsCount ?: 0).toString())
-                                .replace(
-                                    "{limit}",
-                                    (subscription?.residentLimit ?: SubscriptionPlan.FREE.residentLimit).toString(),
-                                ),
+                            text = it,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = BfSuccess,
                         )
-                        state.message?.let {
-                            VerticalGap(8)
-                            Text(
-                                text = it,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = BfSuccess,
+                    }
+                    state.error?.let {
+                        VerticalGap(8)
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                    VerticalGap(12)
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        SubscriptionPlan.entries.forEach { plan ->
+                            PlanRow(
+                                plan = plan,
+                                selected = subscription?.planId == plan.id,
+                                busy = state.busyPlanId == plan.id,
+                                enabled = state.busyPlanId == null,
+                                onSelect = { viewModel.selectPlan(plan.id) },
                             )
-                        }
-                        state.error?.let {
-                            VerticalGap(8)
-                            Text(
-                                text = it,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                        }
-                        VerticalGap(12)
-                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            SubscriptionPlan.entries.forEach { plan ->
-                                PlanRow(
-                                    plan = plan,
-                                    selected = subscription?.planId == plan.id,
-                                    busy = state.busyPlanId == plan.id,
-                                    enabled = state.busyPlanId == null,
-                                    onSelect = { viewModel.selectPlan(plan.id) },
-                                )
-                            }
                         }
                     }
                 }

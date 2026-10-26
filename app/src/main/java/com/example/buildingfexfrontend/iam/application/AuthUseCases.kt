@@ -1,5 +1,6 @@
 package com.example.buildingfexfrontend.iam.application
 
+import com.example.buildingfexfrontend.core.domain.model.AppException
 import com.example.buildingfexfrontend.core.domain.model.SessionRole
 import com.example.buildingfexfrontend.core.domain.model.UserProfile
 import com.example.buildingfexfrontend.core.domain.repository.SessionRepository
@@ -16,8 +17,6 @@ class AuthUseCases(
     val login = LoginUseCase(repository, session)
     val registerAdmin = RegisterAdminUseCase(repository, session)
     val isEmailRegistered = IsEmailRegisteredUseCase(repository)
-    val findInvite = FindResidentInviteUseCase(repository)
-    val setResidentCredentials = SetResidentCredentialsUseCase(repository, session)
     val refreshProfile = RefreshProfileUseCase(repository, session)
     val logout = LogoutUseCase(session)
     val ensureValidSession = EnsureValidSessionUseCase(session)
@@ -29,7 +28,12 @@ class LoginUseCase(
 ) {
     suspend operator fun invoke(email: String, password: String): UserProfile {
         val (profile, token) = repository.login(email.trim().lowercase(), password)
-        session.signIn(profile.toSessionRole(), profile, token)
+        // This app is admin-only: a resident must use the resident app instead.
+        if (profile.role == "resident") {
+            session.clear()
+            throw AppException("RESIDENT_LOGIN_BLOCKED", "")
+        }
+        session.signIn(SessionRole.ADMIN, profile, token)
         return profile
     }
 }
@@ -66,26 +70,6 @@ class IsEmailRegisteredUseCase(private val repository: AuthRepository) {
         repository.isEmailRegistered(email.trim().lowercase())
 }
 
-class FindResidentInviteUseCase(private val repository: AuthRepository) {
-    suspend operator fun invoke(code: String): UserProfile =
-        repository.findResidentByInviteCode(code.trim())
-}
-
-class SetResidentCredentialsUseCase(
-    private val repository: AuthRepository,
-    private val session: SessionRepository,
-) {
-    suspend operator fun invoke(code: String, email: String, password: String): UserProfile {
-        val (profile, token) = repository.setResidentCredentials(
-            code = code.trim(),
-            email = email.trim().lowercase(),
-            password = password,
-        )
-        session.signIn(SessionRole.RESIDENT, profile.copy(role = "resident"), token)
-        return profile
-    }
-}
-
 class RefreshProfileUseCase(
     private val repository: AuthRepository,
     private val session: SessionRepository,
@@ -109,6 +93,3 @@ class EnsureValidSessionUseCase(private val session: SessionRepository) {
         return valid
     }
 }
-
-private fun UserProfile.toSessionRole(): SessionRole =
-    if (role == "resident") SessionRole.RESIDENT else SessionRole.ADMIN

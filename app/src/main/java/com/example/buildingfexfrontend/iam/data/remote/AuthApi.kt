@@ -69,10 +69,7 @@ data class RegisterAdminBody(
     val ruc: String,
 )
 
-data class SetCredentialsBody(val code: String, val email: String, val password: String)
-
 data class CheckEmailDto(val exists: Boolean? = null)
-
 data class FinanceSettingsSeed(
     val ownerAdminId: String?,
     val baseMonthlyExpense: Double = 150.0,
@@ -89,7 +86,7 @@ data class KpiSeed(
 
 /**
  * IAM bounded-context endpoints.
- * Owns authentication, admin registration, invite lookups and seeding.
+ * Owns authentication, admin registration and seeding.
  */
 interface AuthApi {
 
@@ -101,12 +98,6 @@ interface AuthApi {
 
     @GET("api/v1/authentication/check-email")
     suspend fun checkEmail(@Query("email") email: String): CheckEmailDto
-
-    @GET("api/v1/authentication/residents/invite")
-    suspend fun findResidentInvite(@Query("code") code: String): AuthUserDto
-
-    @POST("api/v1/authentication/residents/set-credentials")
-    suspend fun setResidentCredentials(@Body body: SetCredentialsBody): AuthResponseDto
 
     @GET("users/{id}")
     suspend fun userById(@Path("id") id: String): AuthUserDto

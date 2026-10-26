@@ -5,7 +5,7 @@ package com.example.buildingfexfrontend.core.i18n
  * Feature-owned by socialspaces/presentation (GenerationScreen, GenerationViewModel).
  */
 val GenerationTexts: Map<String, TextPair> = mapOf(
-    "gen.title" to ("Generación" to "Generation"),
+    "gen.title" to ("Reservas" to "Reservations"),
     "gen.subtitle" to ("Supervisa las reservas y registra el ingreso de invitados." to "Oversee reservations and register guest check-ins."),
     "gen.reservationsTitle" to ("Reservas" to "Reservations"),
     "gen.empty" to ("No hay reservas registradas." to "There are no registered reservations."),

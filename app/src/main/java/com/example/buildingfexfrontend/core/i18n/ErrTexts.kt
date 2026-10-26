@@ -16,6 +16,7 @@ val ErrTexts: Map<String, TextPair> = mapOf(
     "err.INVALID_PASSWORD" to ("La contraseña es incorrecta." to "The password is incorrect."),
     "err.EMAIL_ALREADY_EXISTS" to ("Ya existe una cuenta con este correo." to "An account with this email already exists."),
     "err.AUTH_ERROR" to ("No se pudo completar la autenticación." to "Sign-in could not be completed."),
+    "err.RESIDENT_LOGIN_BLOCKED" to ("Esta aplicación es para administradores. Ingresa con tu cuenta de administrador o usa la app de residentes." to "This app is for administrators. Sign in with an administrator account or use the resident app."),
     "err.RESIDENT_FIELDS_REQUIRED" to ("Completa nombre y número de departamento para continuar." to "Enter the name and department number to continue."),
     "err.RESIDENT_CODE_ALREADY_EXISTS" to ("Ya existe un residente con ese número de departamento." to "A resident with that department number already exists."),
     "err.INVALID_DEPARTMENT_NUMBER" to ("Número de departamento inválido. Usa 3 o 4 dígitos (ej. 304 = piso 3)." to "Invalid department number. Use 3 or 4 digits (e.g. 304 = floor 3)."),

@@ -28,9 +28,9 @@ val SupportTexts: Map<String, TextPair> = mapOf(
     "sup.faq.1.q" to ("¿Cómo pago mi mantenimiento?" to "How do I pay my maintenance fee?"),
     "sup.faq.1.a" to ("Entra a Finanzas y usa el botón de pago con Mercado Pago. Al confirmar, tu cuota queda registrada al instante." to "Go to Finances and use the Mercado Pago payment button. Once confirmed, your fee is recorded instantly."),
     "sup.faq.2.q" to ("¿Cómo reservo un espacio social?" to "How do I book a social space?"),
-    "sup.faq.2.a" to ("Ve a Servicios, elige el espacio, selecciona fecha y horario y confirma la reserva. Verás tus reservas en Generación." to "Go to Common areas, choose the space, select the date and time and confirm the booking. You'll see your bookings in Billing run."),
+    "sup.faq.2.a" to ("Ve a Servicios, elige el espacio, selecciona fecha y horario y confirma la reserva. Verás tus reservas en Reservas." to "Go to Common areas, choose the space, select the date and time and confirm the booking. You'll see your bookings in Reservations."),
     "sup.faq.3.q" to ("¿Cómo invito a un visitante?" to "How do I invite a visitor?"),
-    "sup.faq.3.a" to ("En Generación, agrega los invitados de tu reserva y comparte el enlace. El acceso caduca 25 minutos después del inicio." to "In Billing run, add your reservation's guests and share the link. Access expires 25 minutes after the start time."),
+    "sup.faq.3.a" to ("En Reservas, agrega los invitados de tu reserva y comparte el enlace. El acceso caduca 25 minutos después del inicio." to "In Reservations, add your reservation's guests and share the link. Access expires 25 minutes after the start time."),
     "sup.faq.4.q" to ("¿Cómo reporto una incidencia?" to "How do I report an incident?"),
     "sup.faq.4.a" to ("En Incidencias describe el problema y envíalo. El administrador dará seguimiento con el estado y el proveedor asignado." to "In Incidents, describe the problem and send it. The administrator will track it with its status and assigned provider."),
 )

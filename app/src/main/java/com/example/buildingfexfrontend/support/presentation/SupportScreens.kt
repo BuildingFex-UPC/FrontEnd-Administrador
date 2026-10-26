@@ -17,9 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
-import androidx.compose.material.icons.outlined.ExpandLess
-import androidx.compose.material.icons.outlined.ExpandMore
-import androidx.compose.material.icons.outlined.HelpOutline
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -37,144 +34,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.buildingfexfrontend.core.di.AppContainer
 import com.example.buildingfexfrontend.core.i18n.string
 import com.example.buildingfexfrontend.core.ui.appViewModel
-import com.example.buildingfexfrontend.core.ui.components.AppOutlinedButton
-import com.example.buildingfexfrontend.core.ui.components.AppTextField
 import com.example.buildingfexfrontend.core.ui.components.ConfirmDialog
 import com.example.buildingfexfrontend.core.ui.components.EmptyState
 import com.example.buildingfexfrontend.core.ui.components.ErrorState
 import com.example.buildingfexfrontend.core.ui.components.FullScreenLoading
-import com.example.buildingfexfrontend.core.ui.components.SectionCard
 import com.example.buildingfexfrontend.core.ui.components.VerticalGap
 import com.example.buildingfexfrontend.core.util.Dates
 import com.example.buildingfexfrontend.support.domain.model.ChatMessage
 import com.example.buildingfexfrontend.support.domain.model.SupportChat
-
-@Composable
-fun ResidentSupportScreen(container: AppContainer) {
-    val viewModel: ResidentSupportViewModel = appViewModel { ResidentSupportViewModel(container.support) }
-    val state by viewModel.state.collectAsStateWithLifecycle()
-
-    val activeChat = state.activeChat
-    if (activeChat != null) {
-        ChatDetailView(
-            chat = activeChat,
-            input = state.input,
-            sending = state.sending,
-            ownRole = "resident",
-            onInputChanged = viewModel::onInputChanged,
-            onSend = viewModel::send,
-            onBack = viewModel::closeChat,
-        )
-        return
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-    ) {
-        Text(
-            text = string("sup.resident.title"),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold,
-        )
-        Text(
-            text = string("sup.resident.subtitle"),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        VerticalGap(16)
-
-        when {
-            state.loading -> FullScreenLoading()
-            state.error != null -> ErrorState(state.error!!, onRetry = viewModel::load)
-            else -> LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(bottom = 24.dp),
-            ) {
-                item {
-                    SectionCard(title = string("sup.faqs.title")) {
-                        state.faqs.forEach { faq ->
-                            val expanded = state.expandedFaqId == faq.id
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.background,
-                                ),
-                                onClick = { viewModel.toggleFaq(faq.id) },
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(12.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.HelpOutline,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                    )
-                                    Column(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .padding(horizontal = 10.dp),
-                                    ) {
-                                        Text(string(faq.question), fontWeight = FontWeight.Medium)
-                                        if (expanded) {
-                                            VerticalGap(6)
-                                            Text(
-                                                text = string(faq.answer),
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            )
-                                        }
-                                    }
-                                    Icon(
-                                        imageVector = if (expanded) Icons.Outlined.ExpandLess
-                                        else Icons.Outlined.ExpandMore,
-                                        contentDescription = null,
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-                item {
-                    SectionCard(title = string("sup.chats.title")) {
-                        AppTextField(
-                            value = state.topic,
-                            onValueChange = viewModel::onTopicChange,
-                            label = string("sup.field.topic"),
-                        )
-                        VerticalGap(12)
-                        AppOutlinedButton(
-                            text = if (state.starting) string("sup.action.opening") else string("sup.action.newTicket"),
-                            enabled = !state.starting,
-                            onClick = viewModel::startChat,
-                        )
-                    }
-                }
-                if (state.chats.isEmpty()) {
-                    item { EmptyState(string("sup.resident.empty")) }
-                } else {
-                    items(state.chats, key = { it.id }) { chat ->
-                        ChatRow(chat = chat, onClick = { viewModel.openChat(chat.id) })
-                    }
-                }
-            }
-        }
-    }
-
-    state.message?.let { message ->
-        ConfirmDialog(
-            title = string("sup.dialog.title"),
-            message = message,
-            confirmText = string("sup.dialog.ack"),
-            onConfirm = viewModel::dismissMessage,
-            onDismiss = viewModel::dismissMessage,
-        )
-    }
-}
 
 @Composable
 fun AdminSupportScreen(container: AppContainer) {

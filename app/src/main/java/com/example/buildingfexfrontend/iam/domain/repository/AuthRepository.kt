@@ -23,15 +23,6 @@ interface AuthRepository {
         ruc: String,
     ): AuthResult
 
-    /** Invite lookup by resident code (public, not tenant scoped). */
-    suspend fun findResidentByInviteCode(code: String): UserProfile
-
-    suspend fun setResidentCredentials(
-        code: String,
-        email: String,
-        password: String,
-    ): AuthResult
-
     suspend fun getProfileById(userId: String): UserProfile?
 
     suspend fun findResidentByEmail(email: String): UserProfile?

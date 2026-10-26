@@ -25,7 +25,6 @@ import androidx.compose.material.icons.outlined.MeetingRoom
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.SupportAgent
 import androidx.compose.material.icons.outlined.TrendingUp
 import androidx.compose.material.icons.outlined.Upload
 import androidx.compose.material3.DrawerValue
@@ -70,22 +69,16 @@ import com.example.buildingfexfrontend.core.i18n.AppLanguage
 import com.example.buildingfexfrontend.core.i18n.Language
 import com.example.buildingfexfrontend.core.i18n.string
 import com.example.buildingfexfrontend.dashboard.presentation.AdminDashboardScreen
-import com.example.buildingfexfrontend.dashboard.presentation.ResidentDashboardScreen
 import com.example.buildingfexfrontend.finances.presentation.CollectionsScreen
 import com.example.buildingfexfrontend.finances.presentation.FinanceScreen
-import com.example.buildingfexfrontend.finances.presentation.ResidentFinanceScreen
 import com.example.buildingfexfrontend.imports.presentation.ImportsScreen
 import com.example.buildingfexfrontend.incidents.presentation.AdminIncidentsScreen
-import com.example.buildingfexfrontend.incidents.presentation.ResidentIncidentsScreen
 import com.example.buildingfexfrontend.information.presentation.InformationScreen
 import com.example.buildingfexfrontend.residents.presentation.ResidentsScreen
 import com.example.buildingfexfrontend.settings.presentation.SettingsScreen
 import com.example.buildingfexfrontend.socialspaces.presentation.GenerationScreen
-import com.example.buildingfexfrontend.socialspaces.presentation.MyReservationsScreen
-import com.example.buildingfexfrontend.socialspaces.presentation.ServicesScreen
 import com.example.buildingfexfrontend.socialspaces.presentation.SpacesScreen
 import com.example.buildingfexfrontend.support.presentation.AdminSupportScreen
-import com.example.buildingfexfrontend.support.presentation.ResidentSupportScreen
 import com.example.buildingfexfrontend.team.presentation.TeamScreen
 import com.example.buildingfexfrontend.ui.theme.BfPrimary
 import kotlinx.coroutines.launch
@@ -117,29 +110,19 @@ private val AdminItems = listOf(
     ShellItem("settings", "shell.nav.settings", Icons.Outlined.Settings, { SettingsScreen(it) }),
 )
 
-private val ResidentItems = listOf(
-    ShellItem("resident_dashboard", "shell.nav.dashboard", Icons.Outlined.Dashboard, { ResidentDashboardScreen(it) }),
-    ShellItem("resident_finance", "shell.nav.finances", Icons.Outlined.AccountBalanceWallet, { ResidentFinanceScreen(it) }),
-    ShellItem("resident_services", "shell.nav.resident_services", Icons.Outlined.Dashboard, { ServicesScreen(it) }),
-    ShellItem("resident_reservations", "shell.nav.myReservations", Icons.Outlined.CalendarMonth, { MyReservationsScreen(it) }),
-    ShellItem("resident_incidents", "shell.nav.incidents", Icons.Outlined.Flag, { ResidentIncidentsScreen(it) }),
-    ShellItem("resident_support", "shell.nav.support", Icons.Outlined.SupportAgent, { ResidentSupportScreen(it) }),
-    ShellItem("settings", "shell.nav.settings", Icons.Outlined.Settings, { SettingsScreen(it) }),
-)
-
 /**
  * Root shell: lateral drawer (like the web sidebar) + top bar.
- * The drawer items mirror `AppShellView.vue`: admin and resident menus.
+ * The drawer items mirror `AppShellView.vue`: admin menu (this app is admin-only;
+ * residents use the Flutter resident app).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppShell(container: AppContainer) {
     val session by container.session.session.collectAsStateWithLifecycle()
-    val isResident = session?.profile?.isResident == true
-    val items = if (isResident) ResidentItems else AdminItems
+    val items = AdminItems
     val language by AppLanguage.flow.collectAsStateWithLifecycle()
 
-    var selectedId by rememberSaveable(isResident) { mutableStateOf(items.first().id) }
+    var selectedId by rememberSaveable { mutableStateOf(items.first().id) }
     val selected = items.firstOrNull { it.id == selectedId } ?: items.first()
 
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -157,7 +140,7 @@ fun AppShell(container: AppContainer) {
                     ShellHeader(
                         name = session?.profile?.name.orEmpty(),
                         email = session?.profile?.email.orEmpty(),
-                        role = string(if (isResident) "shell.role.resident" else "shell.role.admin"),
+                        role = string("shell.role.admin"),
                     )
                     items.forEach { item ->
                         NavigationDrawerItem(
