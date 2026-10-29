@@ -9,13 +9,16 @@ data class ResidentFinancialStatus(
     val resident: Resident,
     val nextPaymentDate: String,
     val daysUntilNextPayment: Int,
-    /** 'Paid' | 'Pending' | 'Overdue' */
+    /** 'None' (no receipts yet) | 'Paid' | 'Pending' | 'Overdue' */
     val overallStatus: String,
     val receipts: List<Receipt>,
     val pendingAmount: Double,
 ) {
     val isOverdue: Boolean get() = overallStatus == "Overdue"
     val isPaid: Boolean get() = overallStatus == "Paid"
+
+    /** True when the resident has no receipts at all (nothing is due yet). */
+    val hasNoReceipts: Boolean get() = overallStatus == "None"
 }
 
 /**
@@ -54,12 +57,15 @@ object ResidentFinancialStatusCalculator {
             }
             val hasPending = own.any { it.status == Receipt.STATUS_PENDING }
 
+            // A resident with no receipts has nothing pending: showing
+            // "Pending"/"Overdue" here used to look like a real debt in the
+            // admin app while the resident account (and its dashboard) showed
+            // nothing, because no receipt actually exists.
             val overall = when {
+                own.isEmpty() -> "None"
                 hasOverdue -> "Overdue"
-                own.isEmpty() && daysUntil <= 0 -> "Overdue"
                 hasPending -> "Pending"
-                own.isNotEmpty() -> "Paid"
-                else -> "Pending"
+                else -> "Paid"
             }
 
             ResidentFinancialStatus(

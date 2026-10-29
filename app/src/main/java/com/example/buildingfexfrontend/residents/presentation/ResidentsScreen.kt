@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
@@ -29,7 +30,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -103,6 +106,7 @@ fun ResidentsScreen(container: AppContainer) {
                     items(state.filtered, key = { it.id }) { resident ->
                         ResidentRow(
                             resident = resident,
+                            viewModel = viewModel,
                             onDelete = { viewModel.openDeleteDialog(resident) },
                         )
                     }
@@ -154,8 +158,13 @@ fun ResidentsScreen(container: AppContainer) {
 }
 
 @Composable
-private fun ResidentRow(resident: Resident, onDelete: () -> Unit) {
+private fun ResidentRow(
+    resident: Resident,
+    viewModel: ResidentsViewModel,
+    onDelete: () -> Unit,
+) {
     val context = LocalContext.current
+    val clipboard = LocalClipboardManager.current
     val shareChooserTitle = string("res.share.chooser")
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -199,6 +208,22 @@ private fun ResidentRow(resident: Resident, onDelete: () -> Unit) {
                 }
             }
             if (!resident.hasCredentials) {
+                IconButton(
+                    onClick = {
+                        // Copy ONLY the code (no surrounding text) so it can be
+                        // pasted verbatim into the resident app to create the
+                        // account without any chance of a copy artifact.
+                        clipboard.setText(AnnotatedString(resident.code))
+                        viewModel.notifyCodeCopied()
+                    },
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.ContentCopy,
+                        contentDescription = string("res.copy.cd")
+                            .replace("{name}", resident.name),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
                 IconButton(
                     onClick = {
                         val send = Intent(Intent.ACTION_SEND).apply {

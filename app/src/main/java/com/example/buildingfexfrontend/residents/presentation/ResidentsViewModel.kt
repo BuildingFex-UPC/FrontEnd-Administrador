@@ -153,4 +153,8 @@ class ResidentsViewModel(private val useCases: ResidentsUseCases) : ViewModel() 
     }
 
     fun dismissMessage() = _state.update { it.copy(message = null) }
+
+    /** Confirms that the invite code was copied (only the code, verbatim). */
+    fun notifyCodeCopied() =
+        _state.update { it.copy(message = stringOf("res.msg.codeCopied")) }
 }

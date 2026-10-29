@@ -25,6 +25,8 @@ val ResidentsTexts: Map<String, TextPair> = mapOf(
     "res.row.noAccount" to ("Sin activar · comparte el código para que cree su acceso" to "Not activated · share the code so they can set up their access"),
     "res.share.chooser" to ("Compartir invitación" to "Share invitation"),
     "res.share.cd" to ("Compartir código de invitación de {name}" to "Share invitation code of {name}"),
+    "res.copy.cd" to ("Copiar solo el código de {name}" to "Copy only the code of {name}"),
+    "res.msg.codeCopied" to ("Código copiado al portapapeles. Pégalo en la app de residente para crear la cuenta." to "Code copied to clipboard. Paste it in the resident app to create the account."),
     "res.invite.header" to ("BuildingFex – Invitación para {name} (Piso {floor}, Dept. {dept}).\n\n" to "BuildingFex – Invitation for {name} (Floor {floor}, Apt. {dept}).\n\n"),
     "res.invite.code" to ("Código de invitación: {code}\n\n" to "Invitation code: {code}\n\n"),
     "res.invite.instructions" to ("Instala la app BuildingFex y, en la pantalla de acceso, toca \"¿Tienes un código de invitación? Actívalo\" para crear tu contraseña." to "Install the BuildingFex app and, on the access screen, tap \"Do you have an invitation code? Activate it\" to create your password."),

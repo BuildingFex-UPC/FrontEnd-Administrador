@@ -147,6 +147,11 @@ private fun ResidentStatusRow(
     val (chipText, chipContainer, chipContent) = when (status.overallStatus) {
         "Overdue" -> Triple(string("fin.chip.overdue"), BfErrorContainer, BfError)
         "Paid" -> Triple(string("fin.chip.paid"), BfSuccessContainer, BfSuccess)
+        "None" -> Triple(
+            string("fin.chip.none"),
+            MaterialTheme.colorScheme.surfaceVariant,
+            MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         else -> Triple(string("fin.chip.pending"), BfWarningContainer, BfWarning)
     }
 
@@ -170,23 +175,36 @@ private fun ResidentStatusRow(
         }
         VerticalGap(6)
         Text(
-            text = string("fin.row.nextPayment")
-                .replace("{date}", Dates.displayDate(status.nextPaymentDate))
-                .replace("{days}", status.daysUntilNextPayment.toString())
-                .replace("{amount}", Dates.currency(status.pendingAmount)),
+            text = if (status.hasNoReceipts) {
+                string("fin.row.noReceipts")
+            } else {
+                string("fin.row.nextPayment")
+                    .replace("{date}", Dates.displayDate(status.nextPaymentDate))
+                    .replace("{days}", status.daysUntilNextPayment.toString())
+                    .replace("{amount}", Dates.currency(status.pendingAmount))
+            },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         VerticalGap(8)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (status.overallStatus != "Paid" && status.receipts.isNotEmpty()) {
+            if (status.hasNoReceipts) {
+                // No receipts yet: offer to issue the first one so the debt
+                // shows up in the resident's app too.
+                AppOutlinedButton(
+                    text = string("fin.action.issue"),
+                    modifier = Modifier.weight(1f),
+                    enabled = !busy,
+                    onClick = onGenerate,
+                )
+            } else if (status.overallStatus != "Paid") {
                 AppOutlinedButton(
                     text = string("fin.action.reconcile"),
                     modifier = Modifier.weight(1f),
                     enabled = !busy,
                     onClick = onReconcile,
                 )
-            } else if (status.overallStatus == "Paid") {
+            } else {
                 AppOutlinedButton(
                     text = string("fin.action.issue"),
                     modifier = Modifier.weight(1f),
@@ -194,12 +212,14 @@ private fun ResidentStatusRow(
                     onClick = onGenerate,
                 )
             }
-            AppOutlinedButton(
-                text = string("fin.action.waiveFee"),
-                modifier = Modifier.weight(1f),
-                enabled = !busy,
-                onClick = onWaive,
-            )
+            if (!status.hasNoReceipts) {
+                AppOutlinedButton(
+                    text = string("fin.action.waiveFee"),
+                    modifier = Modifier.weight(1f),
+                    enabled = !busy,
+                    onClick = onWaive,
+                )
+            }
         }
     }
 }
