@@ -26,4 +26,7 @@ interface AuthRepository {
     suspend fun getProfileById(userId: String): UserProfile?
 
     suspend fun findResidentByEmail(email: String): UserProfile?
+
+    /** Updates the editable profile fields; returns the fresh profile. */
+    suspend fun updateProfile(profile: UserProfile): UserProfile
 }

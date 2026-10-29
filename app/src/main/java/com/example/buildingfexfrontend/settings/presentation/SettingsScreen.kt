@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -22,6 +23,7 @@ import com.example.buildingfexfrontend.core.i18n.string
 import com.example.buildingfexfrontend.core.ui.appViewModel
 import com.example.buildingfexfrontend.core.ui.components.AppButton
 import com.example.buildingfexfrontend.core.ui.components.AppOutlinedButton
+import com.example.buildingfexfrontend.core.ui.components.AppTextField
 import com.example.buildingfexfrontend.core.ui.components.ConfirmDialog
 import com.example.buildingfexfrontend.core.ui.components.ErrorState
 import com.example.buildingfexfrontend.core.ui.components.FullScreenLoading
@@ -88,6 +90,11 @@ fun SettingsScreen(container: AppContainer) {
                         profile.address?.takeIf { it.isNotBlank() }?.let { KeyValue(label = string("set.profile.address"), value = it) }
                         profile.company?.takeIf { it.isNotBlank() }?.let { KeyValue(label = string("set.profile.company"), value = it) }
                         profile.ruc?.takeIf { it.isNotBlank() }?.let { KeyValue(label = string("set.profile.ruc"), value = it) }
+                        VerticalGap(12)
+                        AppOutlinedButton(
+                            text = string("set.profile.edit"),
+                            onClick = viewModel::openEditProfile,
+                        )
                     }
                 }
 
@@ -128,7 +135,7 @@ fun SettingsScreen(container: AppContainer) {
                                 selected = subscription?.planId == plan.id,
                                 busy = state.busyPlanId == plan.id,
                                 enabled = state.busyPlanId == null,
-                                onSelect = { viewModel.selectPlan(plan.id) },
+                                onSelect = { viewModel.requestPlanChange(plan.id) },
                             )
                         }
                     }
@@ -156,6 +163,104 @@ fun SettingsScreen(container: AppContainer) {
             onDismiss = viewModel::dismissMessage,
         )
     }
+
+    // Changing plans has billing consequences: always confirm first.
+    state.confirmPlanId?.let { planId ->
+        val plan = SubscriptionPlan.entries.firstOrNull { it.id == planId }
+        if (plan != null) {
+            ConfirmDialog(
+                title = string("set.plans.confirm.title"),
+                message = string("set.plans.confirm.message")
+                    .replace("{plan}", plan.label)
+                    .replace("{price}", plan.monthlyPricePen.toString())
+                    .replace("{limit}", plan.residentLimit.toString()),
+                confirmText = string("set.plans.confirm.confirm"),
+                onConfirm = viewModel::confirmPlanChange,
+                onDismiss = viewModel::cancelPlanChange,
+            )
+        }
+    }
+
+    if (state.showEditProfile) {
+        EditProfileDialog(state = state, viewModel = viewModel)
+    }
+}
+
+@Composable
+private fun EditProfileDialog(state: SettingsUiState, viewModel: SettingsViewModel) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = { if (!state.editLoading) viewModel.closeEditProfile() },
+        title = { Text(string("set.edit.title")) },
+        text = {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                AppTextField(
+                    value = state.editName,
+                    onValueChange = viewModel::onEditNameChange,
+                    label = string("set.profile.name"),
+                    enabled = !state.editLoading,
+                )
+                AppTextField(
+                    value = state.editEmail,
+                    onValueChange = viewModel::onEditEmailChange,
+                    label = string("set.profile.email"),
+                    enabled = !state.editLoading,
+                )
+                AppTextField(
+                    value = state.editDni,
+                    onValueChange = viewModel::onEditDniChange,
+                    label = string("set.profile.dni"),
+                    enabled = !state.editLoading,
+                )
+                AppTextField(
+                    value = state.editAddress,
+                    onValueChange = viewModel::onEditAddressChange,
+                    label = string("set.profile.address"),
+                    enabled = !state.editLoading,
+                )
+                AppTextField(
+                    value = state.editCompany,
+                    onValueChange = viewModel::onEditCompanyChange,
+                    label = string("set.profile.company"),
+                    enabled = !state.editLoading,
+                )
+                AppTextField(
+                    value = state.editRuc,
+                    onValueChange = viewModel::onEditRucChange,
+                    label = string("set.profile.ruc"),
+                    enabled = !state.editLoading,
+                )
+                state.editError?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = viewModel::saveProfile,
+                enabled = !state.editLoading,
+            ) {
+                Text(
+                    if (state.editLoading) string("set.edit.saving")
+                    else string("set.edit.save")
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = viewModel::closeEditProfile,
+                enabled = !state.editLoading,
+            ) {
+                Text(string("set.edit.cancel"))
+            }
+        },
+    )
 }
 
 @Composable

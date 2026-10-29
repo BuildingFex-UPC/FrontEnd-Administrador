@@ -9,6 +9,7 @@ import com.example.buildingfexfrontend.iam.data.remote.FinanceSettingsSeed
 import com.example.buildingfexfrontend.iam.data.remote.KpiSeed
 import com.example.buildingfexfrontend.iam.data.remote.RegisterAdminBody
 import com.example.buildingfexfrontend.iam.data.remote.SignInBody
+import com.example.buildingfexfrontend.iam.data.remote.UpdateProfileBody
 import com.example.buildingfexfrontend.iam.domain.repository.AuthRepository
 import com.example.buildingfexfrontend.iam.domain.repository.AuthResult
 
@@ -61,6 +62,21 @@ class AuthRepositoryImpl(
 
     override suspend fun findResidentByEmail(email: String): UserProfile? = apiCall {
         api.users(mapOf("email" to email)).firstOrNull()?.toDomain()
+    }
+
+    override suspend fun updateProfile(profile: UserProfile): UserProfile = apiCall {
+        api.updateProfile(
+            profile.id,
+            UpdateProfileBody(
+                name = profile.name,
+                dni = profile.dni,
+                address = profile.address,
+                floor = profile.floor,
+                email = profile.email,
+                company = profile.company,
+                ruc = profile.ruc,
+            ),
+        ).toDomain()
     }
 
     /** Mirrors the web `seedAdminDefaults` (best effort, never blocks signup). */

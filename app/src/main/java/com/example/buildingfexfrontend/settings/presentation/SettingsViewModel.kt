@@ -27,6 +27,18 @@ data class SettingsUiState(
     val message: String? = null,
     val error: String? = null,
     val loadError: String? = null,
+    // Profile editing.
+    val showEditProfile: Boolean = false,
+    val editName: String = "",
+    val editEmail: String = "",
+    val editDni: String = "",
+    val editAddress: String = "",
+    val editCompany: String = "",
+    val editRuc: String = "",
+    val editLoading: Boolean = false,
+    val editError: String? = null,
+    // Plan change confirmation (id of the plan awaiting confirmation).
+    val confirmPlanId: String? = null,
 )
 
 /** Profile + subscription plan management (port of AppSettingsView). */
@@ -61,6 +73,23 @@ class SettingsViewModel(
                 }
             }
         }
+    }
+
+    fun requestPlanChange(planId: String) {
+        val s = _state.value
+        if (!s.isAdmin || s.busyPlanId != null || s.planLoading) return
+        if (planId == SubscriptionPlan.FREE.id && s.subscription?.planId == planId) return
+        // Changing the plan has billing consequences, so it always goes
+        // through an explicit confirmation first.
+        _state.update { it.copy(confirmPlanId = planId, message = null, error = null) }
+    }
+
+    fun cancelPlanChange() = _state.update { it.copy(confirmPlanId = null) }
+
+    fun confirmPlanChange() {
+        val planId = _state.value.confirmPlanId ?: return
+        _state.update { it.copy(confirmPlanId = null) }
+        selectPlan(planId)
     }
 
     fun selectPlan(planId: String) {
@@ -194,6 +223,84 @@ class SettingsViewModel(
     }
 
     fun consumeCheckoutUrl() = _state.update { it.copy(openCheckoutUrl = null) }
+
+    // --- Profile editing ---
+
+    fun openEditProfile() {
+        val p = _state.value.profile ?: return
+        _state.update {
+            it.copy(
+                showEditProfile = true,
+                editName = p.name,
+                editEmail = p.email.orEmpty(),
+                editDni = p.dni.orEmpty(),
+                editAddress = p.address.orEmpty(),
+                editCompany = p.company.orEmpty(),
+                editRuc = p.ruc.orEmpty(),
+                editError = null,
+            )
+        }
+    }
+
+    fun closeEditProfile() =
+        _state.update { it.copy(showEditProfile = false, editError = null) }
+
+    fun onEditNameChange(v: String) =
+        _state.update { it.copy(editName = v, editError = null) }
+
+    fun onEditEmailChange(v: String) =
+        _state.update { it.copy(editEmail = v, editError = null) }
+
+    fun onEditDniChange(v: String) =
+        _state.update { it.copy(editDni = v, editError = null) }
+
+    fun onEditAddressChange(v: String) =
+        _state.update { it.copy(editAddress = v, editError = null) }
+
+    fun onEditCompanyChange(v: String) =
+        _state.update { it.copy(editCompany = v, editError = null) }
+
+    fun onEditRucChange(v: String) =
+        _state.update { it.copy(editRuc = v, editError = null) }
+
+    fun saveProfile() {
+        val s = _state.value
+        val current = s.profile ?: return
+        if (s.editName.isBlank()) {
+            _state.update { it.copy(editError = stringOf("set.edit.nameRequired")) }
+            return
+        }
+        _state.update { it.copy(editLoading = true, editError = null) }
+        viewModelScope.launch {
+            try {
+                val updated = auth.updateProfile(
+                    current.copy(
+                        name = s.editName.trim(),
+                        email = s.editEmail.trim().lowercase().ifBlank { null },
+                        dni = s.editDni.trim().ifBlank { null },
+                        address = s.editAddress.trim().ifBlank { null },
+                        company = s.editCompany.trim().ifBlank { null },
+                        ruc = s.editRuc.trim().ifBlank { null },
+                    ),
+                )
+                _state.update {
+                    it.copy(
+                        editLoading = false,
+                        showEditProfile = false,
+                        profile = updated,
+                        message = stringOf("set.msg.profileSaved"),
+                    )
+                }
+            } catch (e: Throwable) {
+                _state.update {
+                    it.copy(
+                        editLoading = false,
+                        editError = AppException.unexpected(e).userMessage(),
+                    )
+                }
+            }
+        }
+    }
 
     fun logout() = auth.logout()
 

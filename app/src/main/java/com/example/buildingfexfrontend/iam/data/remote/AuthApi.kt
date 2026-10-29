@@ -6,6 +6,7 @@ import com.example.buildingfexfrontend.core.domain.model.UserProfile
 import com.google.gson.annotations.SerializedName
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -70,6 +71,17 @@ data class RegisterAdminBody(
 )
 
 data class CheckEmailDto(val exists: Boolean? = null)
+
+data class UpdateProfileBody(
+    val name: String,
+    val dni: String? = null,
+    val address: String? = null,
+    val floor: String? = null,
+    val email: String? = null,
+    val avatar: String? = null,
+    val company: String? = null,
+    val ruc: String? = null,
+)
 data class FinanceSettingsSeed(
     val ownerAdminId: String?,
     val baseMonthlyExpense: Double = 150.0,
@@ -101,6 +113,13 @@ interface AuthApi {
 
     @GET("users/{id}")
     suspend fun userById(@Path("id") id: String): AuthUserDto
+
+    /** `PATCH users/{id}/profile` — editable profile data (both roles). */
+    @PATCH("users/{id}/profile")
+    suspend fun updateProfile(
+        @Path("id") id: String,
+        @Body body: UpdateProfileBody,
+    ): AuthUserDto
 
     @GET("users")
     suspend fun users(

@@ -18,6 +18,7 @@ class AuthUseCases(
     val registerAdmin = RegisterAdminUseCase(repository, session)
     val isEmailRegistered = IsEmailRegisteredUseCase(repository)
     val refreshProfile = RefreshProfileUseCase(repository, session)
+    val updateProfile = UpdateProfileUseCase(repository, session)
     val logout = LogoutUseCase(session)
     val ensureValidSession = EnsureValidSessionUseCase(session)
 }
@@ -77,6 +78,18 @@ class RefreshProfileUseCase(
     suspend operator fun invoke(): UserProfile? {
         val current = session.current() ?: return null
         val fresh = repository.getProfileById(current.profile.id) ?: return current.profile
+        session.updateProfile(fresh)
+        return fresh
+    }
+}
+
+/** Saves the editable profile fields and refreshes the cached session. */
+class UpdateProfileUseCase(
+    private val repository: AuthRepository,
+    private val session: SessionRepository,
+) {
+    suspend operator fun invoke(profile: UserProfile): UserProfile {
+        val fresh = repository.updateProfile(profile)
         session.updateProfile(fresh)
         return fresh
     }
