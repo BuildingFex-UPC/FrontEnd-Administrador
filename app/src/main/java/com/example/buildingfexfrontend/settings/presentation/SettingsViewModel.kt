@@ -37,6 +37,12 @@ data class SettingsUiState(
     val editRuc: String = "",
     val editLoading: Boolean = false,
     val editError: String? = null,
+    // Password change (dialog).
+    val showChangePassword: Boolean = false,
+    val password: String = "",
+    val passwordConfirm: String = "",
+    val passwordLoading: Boolean = false,
+    val passwordError: String? = null,
     // Plan change confirmation (id of the plan awaiting confirmation).
     val confirmPlanId: String? = null,
 )
@@ -303,6 +309,64 @@ class SettingsViewModel(
     }
 
     fun logout() = auth.logout()
+
+    // --- Password change (admins and, in their own app, residents) ---
+
+    fun openChangePassword() {
+        _state.update {
+            it.copy(
+                showChangePassword = true,
+                password = "",
+                passwordConfirm = "",
+                passwordError = null,
+            )
+        }
+    }
+
+    fun closeChangePassword() =
+        _state.update { it.copy(showChangePassword = false, passwordError = null) }
+
+    fun onPasswordChange(v: String) =
+        _state.update { it.copy(password = v, passwordError = null) }
+
+    fun onPasswordConfirmChange(v: String) =
+        _state.update { it.copy(passwordConfirm = v, passwordError = null) }
+
+    fun changePassword() {
+        val s = _state.value
+        if (s.passwordLoading) return
+        val error = when {
+            s.password.length < 6 -> stringOf("auth.error.min_6")
+            s.password != s.passwordConfirm -> stringOf("set.pw.mismatch")
+            else -> null
+        }
+        if (error != null) {
+            _state.update { it.copy(passwordError = error) }
+            return
+        }
+        _state.update { it.copy(passwordLoading = true, passwordError = null) }
+        viewModelScope.launch {
+            try {
+                auth.changePassword(s.password)
+                _state.update {
+                    it.copy(
+                        passwordLoading = false,
+                        showChangePassword = false,
+                        password = "",
+                        passwordConfirm = "",
+                        message = stringOf("set.pw.changed"),
+                    )
+                }
+            } catch (e: Throwable) {
+                _state.update {
+                    it.copy(
+                        passwordLoading = false,
+                        passwordError = AppException.unexpected(e).userMessage(),
+                    )
+                }
+            }
+        }
+    }
 
     fun dismissMessage() = _state.update { it.copy(message = null, error = null) }
 }

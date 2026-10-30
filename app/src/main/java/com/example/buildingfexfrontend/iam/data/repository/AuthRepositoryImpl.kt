@@ -9,6 +9,7 @@ import com.example.buildingfexfrontend.iam.data.remote.FinanceSettingsSeed
 import com.example.buildingfexfrontend.iam.data.remote.KpiSeed
 import com.example.buildingfexfrontend.iam.data.remote.RegisterAdminBody
 import com.example.buildingfexfrontend.iam.data.remote.SignInBody
+import com.example.buildingfexfrontend.iam.data.remote.UpdateCredentialsBody
 import com.example.buildingfexfrontend.iam.data.remote.UpdateProfileBody
 import com.example.buildingfexfrontend.iam.domain.repository.AuthRepository
 import com.example.buildingfexfrontend.iam.domain.repository.AuthResult
@@ -76,6 +77,17 @@ class AuthRepositoryImpl(
                 company = profile.company,
                 ruc = profile.ruc,
             ),
+        ).toDomain()
+    }
+
+    override suspend fun updateCredentials(
+        id: String,
+        email: String?,
+        password: String?,
+    ): UserProfile = apiCall {
+        api.updateCredentials(
+            id,
+            UpdateCredentialsBody(email = email, password = password),
         ).toDomain()
     }
 

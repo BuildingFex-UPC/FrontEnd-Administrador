@@ -82,6 +82,11 @@ data class UpdateProfileBody(
     val company: String? = null,
     val ruc: String? = null,
 )
+
+data class UpdateCredentialsBody(
+    val email: String? = null,
+    val password: String? = null,
+)
 data class FinanceSettingsSeed(
     val ownerAdminId: String?,
     val baseMonthlyExpense: Double = 150.0,
@@ -119,6 +124,13 @@ interface AuthApi {
     suspend fun updateProfile(
         @Path("id") id: String,
         @Body body: UpdateProfileBody,
+    ): AuthUserDto
+
+    /** `PATCH users/{id}` — changes the login email and/or password (both roles). */
+    @PATCH("users/{id}")
+    suspend fun updateCredentials(
+        @Path("id") id: String,
+        @Body body: UpdateCredentialsBody,
     ): AuthUserDto
 
     @GET("users")

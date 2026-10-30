@@ -19,6 +19,7 @@ class AuthUseCases(
     val isEmailRegistered = IsEmailRegisteredUseCase(repository)
     val refreshProfile = RefreshProfileUseCase(repository, session)
     val updateProfile = UpdateProfileUseCase(repository, session)
+    val changePassword = ChangePasswordUseCase(repository, session)
     val logout = LogoutUseCase(session)
     val ensureValidSession = EnsureValidSessionUseCase(session)
 }
@@ -90,6 +91,30 @@ class UpdateProfileUseCase(
 ) {
     suspend operator fun invoke(profile: UserProfile): UserProfile {
         val fresh = repository.updateProfile(profile)
+        session.updateProfile(fresh)
+        return fresh
+    }
+}
+
+/**
+ * Changes the signed-in account's password (`PATCH users/{id}`). The backend
+ * requires the current email alongside the new password, so it is read from
+ * the session. Works for any role (admins included).
+ */
+class ChangePasswordUseCase(
+    private val repository: AuthRepository,
+    private val session: SessionRepository,
+) {
+    suspend operator fun invoke(newPassword: String): UserProfile {
+        val current = session.current()
+            ?: throw AppException("SESSION_NOT_FOUND", "")
+        val email = current.profile.email
+            ?: throw AppException("NO_EMAIL", "")
+        val fresh = repository.updateCredentials(
+            id = current.profile.id,
+            email = email,
+            password = newPassword,
+        )
         session.updateProfile(fresh)
         return fresh
     }

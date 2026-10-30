@@ -14,6 +14,7 @@ val ErrTexts: Map<String, TextPair> = mapOf(
     "err.HTTP_401" to ("Tu sesión expiró. Inicia sesión de nuevo." to "Your session expired. Sign in again."),
     "err.EMAIL_NOT_FOUND" to ("No encontramos una cuenta con este correo. Prueba con otro o regístrate." to "We couldn't find an account with this email. Try another one or sign up."),
     "err.INVALID_PASSWORD" to ("La contraseña es incorrecta." to "The password is incorrect."),
+    "err.NO_EMAIL" to ("Tu cuenta no tiene correo asociado; no se puede cambiar la contraseña." to "Your account has no email; the password cannot be changed."),
     "err.EMAIL_ALREADY_EXISTS" to ("Ya existe una cuenta con este correo." to "An account with this email already exists."),
     "err.AUTH_ERROR" to ("No se pudo completar la autenticación." to "Sign-in could not be completed."),
     "err.RESIDENT_LOGIN_BLOCKED" to ("Esta aplicación es para administradores. Ingresa con tu cuenta de administrador o usa la app de residentes." to "This app is for administrators. Sign in with an administrator account or use the resident app."),

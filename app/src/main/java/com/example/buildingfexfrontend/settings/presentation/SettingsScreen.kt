@@ -95,6 +95,11 @@ fun SettingsScreen(container: AppContainer) {
                             text = string("set.profile.edit"),
                             onClick = viewModel::openEditProfile,
                         )
+                        VerticalGap(8)
+                        AppOutlinedButton(
+                            text = string("set.pw.change"),
+                            onClick = viewModel::openChangePassword,
+                        )
                     }
                 }
 
@@ -184,6 +189,10 @@ fun SettingsScreen(container: AppContainer) {
     if (state.showEditProfile) {
         EditProfileDialog(state = state, viewModel = viewModel)
     }
+
+    if (state.showChangePassword) {
+        ChangePasswordDialog(state = state, viewModel = viewModel)
+    }
 }
 
 @Composable
@@ -256,6 +265,62 @@ private fun EditProfileDialog(state: SettingsUiState, viewModel: SettingsViewMod
             TextButton(
                 onClick = viewModel::closeEditProfile,
                 enabled = !state.editLoading,
+            ) {
+                Text(string("set.edit.cancel"))
+            }
+        },
+    )
+}
+
+@Composable
+private fun ChangePasswordDialog(state: SettingsUiState, viewModel: SettingsViewModel) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = { if (!state.passwordLoading) viewModel.closeChangePassword() },
+        title = { Text(string("set.pw.title")) },
+        text = {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                AppTextField(
+                    value = state.password,
+                    onValueChange = viewModel::onPasswordChange,
+                    label = string("set.pw.new"),
+                    password = true,
+                    enabled = !state.passwordLoading,
+                    supportingText = string("set.pw.hint"),
+                )
+                AppTextField(
+                    value = state.passwordConfirm,
+                    onValueChange = viewModel::onPasswordConfirmChange,
+                    label = string("set.pw.confirm"),
+                    password = true,
+                    enabled = !state.passwordLoading,
+                )
+                state.passwordError?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = viewModel::changePassword,
+                enabled = !state.passwordLoading,
+            ) {
+                Text(
+                    if (state.passwordLoading) string("set.pw.saving")
+                    else string("set.pw.save")
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = viewModel::closeChangePassword,
+                enabled = !state.passwordLoading,
             ) {
                 Text(string("set.edit.cancel"))
             }

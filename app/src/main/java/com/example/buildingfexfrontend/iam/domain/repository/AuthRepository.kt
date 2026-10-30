@@ -29,4 +29,11 @@ interface AuthRepository {
 
     /** Updates the editable profile fields; returns the fresh profile. */
     suspend fun updateProfile(profile: UserProfile): UserProfile
+
+    /**
+     * Changes the login email and/or password (`PATCH users/{id}`). The
+     * backend requires the current email alongside the new password, so both
+     * travel together. Used by admins (and residents) to update credentials.
+     */
+    suspend fun updateCredentials(id: String, email: String?, password: String?): UserProfile
 }
