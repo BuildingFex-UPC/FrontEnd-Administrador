@@ -7,6 +7,7 @@ import com.example.buildingfexfrontend.finances.domain.ResidentFinancialStatus
 import com.example.buildingfexfrontend.finances.domain.ResidentFinancialStatusCalculator
 import com.example.buildingfexfrontend.finances.domain.model.DashboardKpi
 import com.example.buildingfexfrontend.finances.domain.model.FinanceSettings
+import com.example.buildingfexfrontend.finances.domain.model.Payment
 import com.example.buildingfexfrontend.finances.domain.model.Receipt
 import com.example.buildingfexfrontend.finances.domain.repository.FinancesRepository
 import com.example.buildingfexfrontend.finances.domain.repository.ReceiptPatchData
@@ -105,13 +106,32 @@ class GenerateInitialReceiptUseCase(private val repository: FinancesRepository) 
 }
 
 /**
- * Registers a payment: marks the receipt as paid. It does NOT issue the next
- * month's receipt; that only happens through the explicit
- * "Generar recibos del mes" action.
+ * Registers a payment: marks the receipt as paid and records a matching
+ * [Payment] row. The payment row is what feeds the resident app's "total
+ * paid" (it sums `payments`, not receipt status), so without it the admin
+ * could settle a debt and the resident's paid total would never move.
+ * It does NOT issue the next month's receipt; that only happens through the
+ * explicit "Generar recibos del mes" action.
  */
 class ReconcilePaymentUseCase(private val repository: FinancesRepository) {
-    suspend operator fun invoke(receiptId: String) {
-        repository.updateReceipt(receiptId, ReceiptPatchData(status = Receipt.STATUS_PAID))
+    suspend operator fun invoke(receipt: Receipt) {
+        val id = receipt.id ?: return
+        repository.updateReceipt(id, ReceiptPatchData(status = Receipt.STATUS_PAID))
+        // Settling is always for the full outstanding amount (base + mora).
+        val total = receipt.amount + receipt.lateFee
+        if (total > 0) {
+            repository.addPayment(
+                Payment(
+                    residentId = receipt.residentId,
+                    feeId = id,
+                    feeMonth = Dates.monthYearLabel(receipt.dueDate),
+                    concept = receipt.concept.ifBlank { "Mantenimiento" },
+                    amount = total,
+                    paidAt = Dates.nowIso(),
+                    method = "Efectivo",
+                ),
+            )
+        }
     }
 }
 

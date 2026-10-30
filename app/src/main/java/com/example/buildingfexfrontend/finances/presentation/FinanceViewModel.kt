@@ -117,9 +117,8 @@ class FinanceViewModel(private val useCases: FinanceUseCases) : ViewModel() {
             .filter { it.status != com.example.buildingfexfrontend.finances.domain.model.Receipt.STATUS_PAID }
             .minByOrNull { it.dueDate }
             ?: return
-        val id = target.id ?: return
         runAction("pago") {
-            useCases.reconcilePayment(id)
+            useCases.reconcilePayment(target)
             stringOf("fin.msg.paymentRegistered")
         }
     }
