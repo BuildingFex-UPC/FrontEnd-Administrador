@@ -2,6 +2,7 @@ package com.example.buildingfexfrontend.socialspaces.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +23,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.buildingfexfrontend.core.di.AppContainer
 import com.example.buildingfexfrontend.core.i18n.string
 import com.example.buildingfexfrontend.core.ui.appViewModel
+import com.example.buildingfexfrontend.core.ui.components.DateField
 import com.example.buildingfexfrontend.core.ui.components.EmptyState
 import com.example.buildingfexfrontend.core.ui.components.ErrorState
 import com.example.buildingfexfrontend.core.ui.components.FullScreenLoading
@@ -36,8 +39,6 @@ import com.example.buildingfexfrontend.ui.theme.BfSuccess
 import com.example.buildingfexfrontend.ui.theme.BfSuccessContainer
 import com.example.buildingfexfrontend.ui.theme.BfWarning
 import com.example.buildingfexfrontend.ui.theme.BfWarningContainer
-
-/** Admin reservation oversight + guest check-in (port of AppGenerationView). */
 @Composable
 fun GenerationScreen(container: AppContainer) {
     val viewModel: GenerationViewModel = appViewModel {
@@ -67,6 +68,13 @@ fun GenerationScreen(container: AppContainer) {
             state.loading -> FullScreenLoading()
             state.error != null -> ErrorState(state.error!!, onRetry = viewModel::load)
             else -> {
+                // US32: reserved schedules by space and date.
+                ScheduleSection(
+                    state = state,
+                    onSelectSpace = viewModel::selectScheduleSpace,
+                    onDateChange = viewModel::setScheduleDate,
+                )
+                VerticalGap(16)
                 if (state.reservations.isEmpty()) {
                     SectionCard(title = string("gen.reservationsTitle")) {
                         EmptyState(string("gen.empty"))
@@ -90,6 +98,87 @@ fun GenerationScreen(container: AppContainer) {
 }
 
 @Composable
+private fun ScheduleSection(
+    state: GenerationUiState,
+    onSelectSpace: (String) -> Unit,
+    onDateChange: (String) -> Unit,
+) {
+    SectionCard(
+        title = string("gen.scheduleTitle"),
+        subtitle = string("gen.scheduleSubtitle"),
+    ) {
+        if (state.spacesById.isEmpty()) {
+            EmptyState(string("gen.scheduleNoSpaces"))
+        } else {
+            ScheduleContent(state, onSelectSpace, onDateChange)
+        }
+    }
+}
+
+@Composable
+private fun ScheduleContent(
+    state: GenerationUiState,
+    onSelectSpace: (String) -> Unit,
+    onDateChange: (String) -> Unit,
+) {
+    Column {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            state.spacesById.forEach { (id, space) ->
+                FilterChip(
+                    selected = state.scheduleSpaceId == id,
+                    onClick = { onSelectSpace(id) },
+                    label = { Text(space.name) },
+                )
+            }
+        }
+        VerticalGap(8)
+        DateField(
+            value = state.scheduleDate,
+            onValueChange = onDateChange,
+            label = string("gen.scheduleDate"),
+            modifier = Modifier.fillMaxWidth(),
+        )
+        VerticalGap(12)
+
+        val slots = state.scheduleSlots
+        if (slots.isEmpty()) {
+            Text(
+                text = string("gen.scheduleEmpty"),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                slots.forEach { slot ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                text = "${slot.startTime} – ${slot.endTime}",
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            Text(
+                                text = slot.residentName.ifBlank { "—" } +
+                                        if (slot.residentCode.isNotBlank()) " (${slot.residentCode})" else "",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        StatusChip(
+                            text = string("gen.scheduleBusy"),
+                            container = BfWarningContainer,
+                            content = BfWarning,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun ReservationCard(
     reservation: Reservation,
     spacesById: Map<String, Space>,
@@ -103,7 +192,7 @@ private fun ReservationCard(
             Text(
                 text = string("gen.resident")
                     .replace("{name}", reservation.residentName.ifBlank { "—" }) +
-                    if (reservation.residentCode.isNotBlank()) " (${reservation.residentCode})" else "",
+                        if (reservation.residentCode.isNotBlank()) " (${reservation.residentCode})" else "",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
