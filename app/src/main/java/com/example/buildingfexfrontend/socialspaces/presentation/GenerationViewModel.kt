@@ -3,6 +3,7 @@ package com.example.buildingfexfrontend.socialspaces.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.buildingfexfrontend.core.domain.model.AppException
+import com.example.buildingfexfrontend.core.util.Dates
 import com.example.buildingfexfrontend.socialspaces.application.ReservationsUseCases
 import com.example.buildingfexfrontend.socialspaces.application.SpacesUseCases
 import com.example.buildingfexfrontend.socialspaces.domain.model.Guest
@@ -21,9 +22,15 @@ data class GenerationUiState(
     val spacesById: Map<String, Space> = emptyMap(),
     val savingKey: String? = null,
     val message: String? = null,
-)
+    val scheduleSpaceId: String? = null,
+    val scheduleDate: String = Dates.todayYmd(),
+) {
+    val scheduleSlots: List<Reservation>
+        get() = reservations
+            .filter { it.spaceId == scheduleSpaceId && it.date.take(10) == scheduleDate }
+            .sortedBy { it.startTime }
+}
 
-/** Admin oversight of every reservation plus guest check-in (port of AppGenerationView). */
 class GenerationViewModel(
     private val reservations: ReservationsUseCases,
     private val spaces: SpacesUseCases,
@@ -42,14 +49,17 @@ class GenerationViewModel(
             try {
                 val list = reservations.adminList()
                 val spaceList = spaces.list()
-                _state.update {
-                    it.copy(
+                val byId = spaceList.filterNotNullIds()
+                _state.update { current ->
+                    current.copy(
                         loading = false,
                         reservations = list.sortedWith(
                             compareByDescending<Reservation> { it.date }
                                 .thenByDescending { it.startTime },
                         ),
-                        spacesById = spaceList.filterNotNullIds(),
+                        spacesById = byId,
+                        scheduleSpaceId = current.scheduleSpaceId?.takeIf { id -> byId.containsKey(id) }
+                            ?: byId.keys.firstOrNull(),
                     )
                 }
             } catch (e: Throwable) {
@@ -58,6 +68,12 @@ class GenerationViewModel(
                 }
             }
         }
+    }
+
+    fun selectScheduleSpace(spaceId: String) = _state.update { it.copy(scheduleSpaceId = spaceId) }
+
+    fun setScheduleDate(date: String) {
+        if (date.isNotBlank()) _state.update { it.copy(scheduleDate = date) }
     }
 
     fun toggleCheckIn(reservation: Reservation, guest: Guest, checkedIn: Boolean) {
