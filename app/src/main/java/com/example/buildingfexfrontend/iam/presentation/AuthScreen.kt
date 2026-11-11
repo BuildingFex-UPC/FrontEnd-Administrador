@@ -1,15 +1,15 @@
 package com.example.buildingfexfrontend.iam.presentation
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Apartment
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -18,13 +18,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.buildingfexfrontend.R
 import com.example.buildingfexfrontend.core.di.AppContainer
 import com.example.buildingfexfrontend.core.i18n.string
 import com.example.buildingfexfrontend.core.ui.appViewModel
@@ -46,14 +42,12 @@ fun AuthScreen(container: AppContainer) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         VerticalGap(24)
-        Image(
-            painter = painterResource(R.drawable.logo_buildingfex),
+        // Same icon as the resident app's login, so both apps feel like one product.
+        Icon(
+            imageVector = Icons.Outlined.Apartment,
             contentDescription = "BuildingFex",
-            modifier = Modifier
-                .width(220.dp)
-                .height(67.dp)
-                .clip(RoundedCornerShape(12.dp)),
-            contentScale = ContentScale.Fit,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.primary,
         )
         VerticalGap(16)
         Text(
