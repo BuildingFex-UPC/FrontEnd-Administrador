@@ -24,6 +24,7 @@ data class SpacesUiState(
     val description: String = "",
     val capacity: String = "",
     val imageUrl: String = "",
+    val cost: String = "0.00",
     val photoProcessing: Boolean = false,
     val busy: Boolean = false,
     val deleteTarget: Space? = null,
@@ -62,6 +63,7 @@ class SpacesViewModel(private val useCases: SpacesUseCases) : ViewModel() {
             description = "",
             capacity = "",
             imageUrl = "",
+            cost = "0.00",
             photoProcessing = false,
             formError = null,
             message = null,
@@ -76,6 +78,7 @@ class SpacesViewModel(private val useCases: SpacesUseCases) : ViewModel() {
             description = space.description,
             capacity = space.capacity?.toString().orEmpty(),
             imageUrl = space.imageUrl,
+            cost = space.cost.toString(),
             photoProcessing = false,
             formError = null,
             message = null,
@@ -91,6 +94,7 @@ class SpacesViewModel(private val useCases: SpacesUseCases) : ViewModel() {
             "name" -> it.copy(name = value, formError = null)
             "description" -> it.copy(description = value, formError = null)
             "capacity" -> it.copy(capacity = value, formError = null)
+            "cost" -> it.copy(cost = value, formError = null)
             else -> it
         }
     }
@@ -111,22 +115,50 @@ class SpacesViewModel(private val useCases: SpacesUseCases) : ViewModel() {
 
     fun submit() {
         val s = _state.value
+        val parsedCost = s.cost.trim().replace(",", ".").toDoubleOrNull()
+
+        if (parsedCost == null || !parsedCost.isFinite() || parsedCost < 0) {
+            _state.update {
+                it.copy(formError = "Ingresa un costo válido mayor o igual a cero.")
+            }
+            return
+        }
+
         _state.update { it.copy(busy = true, message = null, formError = null) }
+
         viewModelScope.launch {
             try {
                 if (s.dialog == SpaceDialog.EDIT && s.editId != null) {
-                    useCases.update(s.editId, s.name, s.description, s.capacity, s.imageUrl)
+                    useCases.update(
+                        s.editId,
+                        s.name,
+                        s.description,
+                        s.capacity,
+                        s.imageUrl,
+                        parsedCost,
+                    )
                 } else {
-                    useCases.add(s.name, s.description, s.capacity, s.imageUrl)
+                    useCases.add(
+                        s.name,
+                        s.description,
+                        s.capacity,
+                        s.imageUrl,
+                        parsedCost,
+                    )
                 }
+
                 val spaces = useCases.list()
                 _state.update {
-                    it.copy(busy = false, dialog = SpaceDialog.NONE, spaces = spaces, message = stringOf("spaces.savedMessage"))
+                    it.copy(
+                        busy = false,
+                        dialog = SpaceDialog.NONE,
+                        spaces = spaces,
+                        message = stringOf("spaces.savedMessage"),
+                    )
                 }
             } catch (e: Throwable) {
                 val error = AppException.unexpected(e).userMessage()
                 _state.update {
-                    // Keep validation errors inside the open form instead of a stacked dialog.
                     if (it.dialog != SpaceDialog.NONE) it.copy(busy = false, formError = error)
                     else it.copy(busy = false, message = error)
                 }
@@ -151,11 +183,7 @@ class SpacesViewModel(private val useCases: SpacesUseCases) : ViewModel() {
                     stringOf("spaces.deletedMessage")
                 }
                 _state.update {
-                    it.copy(
-                        busy = false,
-                        spaces = spaces,
-                        message = deletedMessage,
-                    )
+                    it.copy(busy = false, spaces = spaces, message = deletedMessage)
                 }
             } catch (e: Throwable) {
                 _state.update {

@@ -16,6 +16,7 @@ data class SpaceDto(
     val capacity: Int? = null,
     val imageUrl: String? = null,
     val ownerAdminId: String? = null,
+    val cost: Double? = null,
 ) {
     fun toDomain() = Space(
         id = id,
@@ -23,6 +24,7 @@ data class SpaceDto(
         description = description.orEmpty(),
         capacity = capacity,
         imageUrl = imageUrl.orEmpty(),
+        cost = cost ?: 0.0,
     )
 }
 
@@ -31,9 +33,9 @@ data class SpacePatch(
     val description: String? = null,
     val capacity: Int? = null,
     val imageUrl: String? = null,
+    val cost: Double? = null,
 )
 
-/** Social Spaces bounded-context endpoints (spaces side). */
 interface SpacesApi {
 
     @GET("socialSpaces")

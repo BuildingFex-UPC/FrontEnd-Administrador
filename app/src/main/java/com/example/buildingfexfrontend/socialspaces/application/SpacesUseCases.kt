@@ -6,7 +6,6 @@ import com.example.buildingfexfrontend.socialspaces.domain.model.Space
 import com.example.buildingfexfrontend.socialspaces.domain.repository.ReservationsRepository
 import com.example.buildingfexfrontend.socialspaces.domain.repository.SpacesRepository
 
-/** Admin-side space catalog use cases (CRUD with reservation cascade delete). */
 class SpacesUseCases(
     private val spaces: SpacesRepository,
     private val reservations: ReservationsRepository,
@@ -28,11 +27,13 @@ class AddSpaceUseCase(private val spaces: SpacesRepository) {
         description: String,
         capacityText: String,
         imageUrl: String,
+        cost: Double,
     ): Space = spaces.add(
         name = name,
         description = description,
         capacity = capacityText.trim().toIntOrNull(),
         imageUrl = imageUrl,
+        cost = cost,
     )
 }
 
@@ -43,16 +44,17 @@ class UpdateSpaceUseCase(private val spaces: SpacesRepository) {
         description: String,
         capacityText: String,
         imageUrl: String,
+        cost: Double,
     ): Space = spaces.update(
         id = id,
         name = name,
         description = description,
         capacity = capacityText.trim().toIntOrNull(),
         imageUrl = imageUrl,
+        cost = cost,
     )
 }
 
-/** Mirrors the web flow: reservations of the space are deleted first. */
 class RemoveSpaceUseCase(
     private val spaces: SpacesRepository,
     private val reservations: ReservationsRepository,
