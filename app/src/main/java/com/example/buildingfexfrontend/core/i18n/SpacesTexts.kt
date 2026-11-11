@@ -5,6 +5,8 @@ package com.example.buildingfexfrontend.core.i18n
  * Feature-owned by socialspaces/presentation (SpacesScreen, SpacesViewModel).
  */
 val SpacesTexts: Map<String, TextPair> = mapOf(
+    "spaces.fieldCost" to ("Costo (S/)" to "Cost (S/)"),
+    "spaces.cost" to ("Costo: S/ {n}" to "Cost: S/ {n}"),
     "spaces.title" to ("Espacios sociales" to "Social spaces"),
     "spaces.subtitle" to ("Publica las áreas comunes que los residentes pueden reservar." to "Publish the common areas that residents can reserve."),
     "spaces.catalogTitle" to ("Catálogo de espacios" to "Space catalog"),

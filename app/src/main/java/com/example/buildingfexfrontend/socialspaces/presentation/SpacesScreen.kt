@@ -106,6 +106,14 @@ fun SpacesScreen(container: AppContainer) {
                 onValueChange = { viewModel.onFieldChange("name", it) },
                 label = string("spaces.fieldName"),
             )
+
+            VerticalGap(12)
+            AppTextField(
+                value = state.cost,
+                onValueChange = { viewModel.onFieldChange("cost", it) },
+                label = string("spaces.fieldCost"),
+            )
+
             VerticalGap(12)
             AppTextField(
                 value = state.description,
@@ -159,6 +167,7 @@ fun SpacesScreen(container: AppContainer) {
     }
 }
 
+
 @Composable
 private fun SpaceRow(space: Space, onEdit: () -> Unit, onDelete: () -> Unit) {
     OutlinedCardBox {
@@ -191,6 +200,14 @@ private fun SpaceRow(space: Space, onEdit: () -> Unit, onDelete: () -> Unit) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
+                    Text(
+                        text = string("spaces.cost").replace(
+                            "{n}",
+                            String.format(java.util.Locale.US, "%.2f", space.cost),
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
             VerticalGap(8)
@@ -201,3 +218,4 @@ private fun SpaceRow(space: Space, onEdit: () -> Unit, onDelete: () -> Unit) {
         }
     }
 }
+

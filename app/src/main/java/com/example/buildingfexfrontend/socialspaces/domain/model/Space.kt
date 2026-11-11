@@ -10,6 +10,7 @@ data class Space(
     val description: String = "",
     val capacity: Int? = null,
     val imageUrl: String = "",
+    val cost: Double = 0.0,
 )
 
 data class Guest(

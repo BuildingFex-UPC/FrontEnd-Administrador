@@ -13,7 +13,13 @@ interface SpacesRepository {
 
     suspend fun list(): List<Space>
 
-    suspend fun add(name: String, description: String, capacity: Int?, imageUrl: String): Space
+    suspend fun add(
+        name: String,
+        description: String,
+        capacity: Int?,
+        imageUrl: String,
+        cost: Double,
+    ): Space
 
     suspend fun update(
         id: String,
@@ -21,6 +27,7 @@ interface SpacesRepository {
         description: String,
         capacity: Int?,
         imageUrl: String?,
+        cost: Double,
     ): Space
 
     suspend fun remove(id: String)
