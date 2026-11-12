@@ -11,6 +11,10 @@ data class Space(
     val capacity: Int? = null,
     val imageUrl: String = "",
     val cost: Double = 0.0,
+    /** US19: reglas de uso del área común. */
+    val rules: String = "",
+    /** US19: si el área está en mantenimiento no admite reservas. */
+    val underMaintenance: Boolean = false,
 )
 
 data class Guest(

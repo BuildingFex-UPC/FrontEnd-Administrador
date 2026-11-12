@@ -17,6 +17,8 @@ data class SpaceDto(
     val imageUrl: String? = null,
     val ownerAdminId: String? = null,
     val cost: Double? = null,
+    val rules: String? = null,
+    val underMaintenance: Boolean? = null,
 ) {
     fun toDomain() = Space(
         id = id,
@@ -25,6 +27,8 @@ data class SpaceDto(
         capacity = capacity,
         imageUrl = imageUrl.orEmpty(),
         cost = cost ?: 0.0,
+        rules = rules.orEmpty(),
+        underMaintenance = underMaintenance ?: false,
     )
 }
 
@@ -34,6 +38,8 @@ data class SpacePatch(
     val capacity: Int? = null,
     val imageUrl: String? = null,
     val cost: Double? = null,
+    val rules: String? = null,
+    val underMaintenance: Boolean? = null,
 )
 
 interface SpacesApi {

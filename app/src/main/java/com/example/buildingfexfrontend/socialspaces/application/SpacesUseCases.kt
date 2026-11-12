@@ -28,12 +28,16 @@ class AddSpaceUseCase(private val spaces: SpacesRepository) {
         capacityText: String,
         imageUrl: String,
         cost: Double,
+        rules: String = "",
+        underMaintenance: Boolean = false,
     ): Space = spaces.add(
         name = name,
         description = description,
         capacity = capacityText.trim().toIntOrNull(),
         imageUrl = imageUrl,
         cost = cost,
+        rules = rules,
+        underMaintenance = underMaintenance,
     )
 }
 
@@ -45,6 +49,8 @@ class UpdateSpaceUseCase(private val spaces: SpacesRepository) {
         capacityText: String,
         imageUrl: String,
         cost: Double,
+        rules: String = "",
+        underMaintenance: Boolean = false,
     ): Space = spaces.update(
         id = id,
         name = name,
@@ -52,6 +58,8 @@ class UpdateSpaceUseCase(private val spaces: SpacesRepository) {
         capacity = capacityText.trim().toIntOrNull(),
         imageUrl = imageUrl,
         cost = cost,
+        rules = rules,
+        underMaintenance = underMaintenance,
     )
 }
 

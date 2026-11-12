@@ -25,6 +25,8 @@ class SpacesRepositoryImpl(
         capacity: Int?,
         imageUrl: String,
         cost: Double,
+        rules: String,
+        underMaintenance: Boolean,
     ): Space = apiCall {
         val cleanName = name.trim()
         if (cleanName.isEmpty()) {
@@ -40,6 +42,8 @@ class SpacesRepositoryImpl(
                 imageUrl = imageUrl.trim(),
                 ownerAdminId = ownerId,
                 cost = cost,
+                rules = rules.trim(),
+                underMaintenance = underMaintenance,
             ),
         ).toDomain()
     }
@@ -51,6 +55,8 @@ class SpacesRepositoryImpl(
         capacity: Int?,
         imageUrl: String?,
         cost: Double,
+        rules: String,
+        underMaintenance: Boolean,
     ): Space = apiCall {
         val cleanId = id.trim()
         if (cleanId.isEmpty()) {
@@ -68,6 +74,8 @@ class SpacesRepositoryImpl(
                 capacity = capacity,
                 imageUrl = imageUrl?.trim(),
                 cost = cost,
+                rules = rules.trim(),
+                underMaintenance = underMaintenance,
             ),
         ).toDomain()
     }

@@ -3,11 +3,14 @@ package com.example.buildingfexfrontend.dashboard.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.buildingfexfrontend.core.domain.model.AppException
+import com.example.buildingfexfrontend.core.util.Dates
 import com.example.buildingfexfrontend.finances.application.CollectionsUseCases
 import com.example.buildingfexfrontend.finances.application.FinanceUseCases
 import com.example.buildingfexfrontend.finances.domain.model.DashboardKpi
 import com.example.buildingfexfrontend.incidents.application.IncidentsUseCases
 import com.example.buildingfexfrontend.incidents.domain.model.Incident
+import com.example.buildingfexfrontend.socialspaces.application.ReservationsUseCases
+import com.example.buildingfexfrontend.socialspaces.domain.model.Reservation
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,19 +31,52 @@ data class ChartData(
         get() = income.any { it > 0 } || expenses.any { it > 0 }
 }
 
+/** Bundle returned by the parallel dashboard loads (Kotlin has no built-in 5-tuple). */
+private data class DashboardLoad(
+    val kpi: DashboardKpi,
+    val chart: ChartData,
+    val recentIncidents: List<Incident>,
+    val todayReservations: List<Reservation>,
+    val upcomingReservations: List<Reservation>,
+)
+
+/**
+ * US26: splits the admin's reservations into today's list (ordered by start
+ * time) and the nearest upcoming ones (date then start time, max 5).
+ * Dates may come as `yyyy-MM-dd` or full ISO — only the first 10 chars count.
+ */
+fun splitReservations(
+    reservations: List<Reservation>,
+    todayYmd: String,
+): Pair<List<Reservation>, List<Reservation>> {
+    val today = reservations
+        .filter { it.date.take(10) == todayYmd }
+        .sortedBy { it.startTime }
+    val upcoming = reservations
+        .filter { it.date.take(10) > todayYmd }
+        .sortedWith(compareBy({ it.date }, { it.startTime }))
+        .take(5)
+    return today to upcoming
+}
+
 data class AdminDashboardUiState(
     val loading: Boolean = true,
     val error: String? = null,
     val kpi: DashboardKpi = DashboardKpi(),
     val chart: ChartData = ChartData(),
     val recentIncidents: List<Incident> = emptyList(),
+    /** US26: reservations of today (resumen de reservas del dashboard). */
+    val todayReservations: List<Reservation> = emptyList(),
+    /** US26: upcoming reservations, nearest first. */
+    val upcomingReservations: List<Reservation> = emptyList(),
 )
 
-/** Admin dashboard: KPIs, 6-month income/expense chart and recent incidents. */
+/** Admin dashboard: KPIs, 6-month income/expense chart, recent incidents and reservations. */
 class AdminDashboardViewModel(
     private val finances: FinanceUseCases,
     private val collections: CollectionsUseCases,
     private val incidents: IncidentsUseCases,
+    private val reservations: ReservationsUseCases,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AdminDashboardUiState())
@@ -54,19 +90,35 @@ class AdminDashboardViewModel(
         _state.update { it.copy(loading = true, error = null) }
         viewModelScope.launch {
             try {
-                val (kpi, chart, recent) = coroutineScope {
+                val loaded = coroutineScope {
                     val kpiDeferred = async { finances.kpis() }
                     val incidentsDeferred = async {
                         incidents.listAll()
                             .sortedByDescending { it.createdAt.orEmpty() }
                             .take(5)
                     }
+                    val reservationsDeferred = async { reservations.adminList() }
                     val kpiValue = kpiDeferred.await()
                     val chartValue = buildChart(kpiValue)
-                    Triple(kpiValue, chartValue, incidentsDeferred.await())
+                    val (todayList, upcomingList) =
+                        splitReservations(reservationsDeferred.await(), Dates.todayYmd())
+                    DashboardLoad(
+                        kpi = kpiValue,
+                        chart = chartValue,
+                        recentIncidents = incidentsDeferred.await(),
+                        todayReservations = todayList,
+                        upcomingReservations = upcomingList,
+                    )
                 }
                 _state.update {
-                    it.copy(loading = false, kpi = kpi, chart = chart, recentIncidents = recent)
+                    it.copy(
+                        loading = false,
+                        kpi = loaded.kpi,
+                        chart = loaded.chart,
+                        recentIncidents = loaded.recentIncidents,
+                        todayReservations = loaded.todayReservations,
+                        upcomingReservations = loaded.upcomingReservations,
+                    )
                 }
             } catch (e: Throwable) {
                 _state.update {
