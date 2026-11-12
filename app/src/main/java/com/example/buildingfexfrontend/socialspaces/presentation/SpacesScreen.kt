@@ -3,14 +3,17 @@ package com.example.buildingfexfrontend.socialspaces.presentation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,8 +39,11 @@ import com.example.buildingfexfrontend.core.ui.components.FullScreenLoading
 import com.example.buildingfexfrontend.core.ui.components.OutlinedCardBox
 import com.example.buildingfexfrontend.core.ui.components.PhotoPickerField
 import com.example.buildingfexfrontend.core.ui.components.SectionCard
+import com.example.buildingfexfrontend.core.ui.components.StatusChip
 import com.example.buildingfexfrontend.core.ui.components.VerticalGap
 import com.example.buildingfexfrontend.socialspaces.domain.model.Space
+import com.example.buildingfexfrontend.ui.theme.BfWarning
+import com.example.buildingfexfrontend.ui.theme.BfWarningContainer
 
 @Composable
 fun SpacesScreen(container: AppContainer) {
@@ -123,6 +129,34 @@ fun SpacesScreen(container: AppContainer) {
             )
             VerticalGap(12)
             AppTextField(
+                value = state.rules,
+                onValueChange = { viewModel.onFieldChange("rules", it) },
+                label = string("spaces.fieldRules"),
+                singleLine = false,
+            )
+            VerticalGap(12)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        text = string("spaces.maintenance"),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Text(
+                        text = string("spaces.maintenanceHint"),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(
+                    checked = state.underMaintenance,
+                    onCheckedChange = viewModel::onUnderMaintenanceChange,
+                )
+            }
+            VerticalGap(12)
+            AppTextField(
                 value = state.capacity,
                 onValueChange = { viewModel.onFieldChange("capacity", it) },
                 label = string("spaces.fieldCapacity"),
@@ -184,10 +218,27 @@ private fun SpaceRow(space: Space, onEdit: () -> Unit, onDelete: () -> Unit) {
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text(space.name, fontWeight = FontWeight.SemiBold)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(space.name, fontWeight = FontWeight.SemiBold)
+                        if (space.underMaintenance) {
+                            Spacer(Modifier.width(8.dp))
+                            StatusChip(
+                                text = string("spaces.maintenanceBadge"),
+                                container = BfWarningContainer,
+                                content = BfWarning,
+                            )
+                        }
+                    }
                     if (space.description.isNotBlank()) {
                         Text(
                             text = space.description,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    if (space.rules.isNotBlank()) {
+                        Text(
+                            text = string("spaces.rulesLabel").replace("{rules}", space.rules),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )

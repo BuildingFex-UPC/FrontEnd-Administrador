@@ -41,7 +41,12 @@ import com.example.buildingfexfrontend.ui.theme.BfWarningContainer
 @Composable
 fun AdminDashboardScreen(container: AppContainer) {
     val viewModel: AdminDashboardViewModel = appViewModel {
-        AdminDashboardViewModel(container.finances, container.collections, container.incidents)
+        AdminDashboardViewModel(
+            container.finances,
+            container.collections,
+            container.incidents,
+            container.reservations,
+        )
     }
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -111,6 +116,36 @@ fun AdminDashboardScreen(container: AppContainer) {
                 }
 
                 VerticalGap(16)
+                SectionCard(title = string("dash.reservations")) {
+                    if (state.todayReservations.isEmpty() && state.upcomingReservations.isEmpty()) {
+                        EmptyState(string("dash.noReservations"))
+                    } else {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            if (state.todayReservations.isNotEmpty()) {
+                                Text(
+                                    text = string("dash.todayReservations"),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                                state.todayReservations.forEach { reservation ->
+                                    ReservationRow(reservation)
+                                }
+                            }
+                            if (state.upcomingReservations.isNotEmpty()) {
+                                Text(
+                                    text = string("dash.upcomingReservations"),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                                state.upcomingReservations.forEach { reservation ->
+                                    ReservationRow(reservation)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                VerticalGap(16)
                 SectionCard(title = string("dash.recentIncidents")) {
                     if (state.recentIncidents.isEmpty()) {
                         EmptyState(string("dash.noIncidents"))
@@ -146,6 +181,27 @@ fun AdminDashboardScreen(container: AppContainer) {
             }
         }
         VerticalGap(24)
+    }
+}
+
+@Composable
+private fun ReservationRow(reservation: com.example.buildingfexfrontend.socialspaces.domain.model.Reservation) {
+    OutlinedCardBox {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = reservation.residentName.ifBlank { "—" },
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                )
+                Text(
+                    text = "${Dates.displayDate(reservation.date)} · " +
+                        "${reservation.startTime} – ${reservation.endTime}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
     }
 }
 

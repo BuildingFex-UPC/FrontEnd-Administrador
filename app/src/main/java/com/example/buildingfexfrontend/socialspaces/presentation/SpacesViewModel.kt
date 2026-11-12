@@ -25,6 +25,8 @@ data class SpacesUiState(
     val capacity: String = "",
     val imageUrl: String = "",
     val cost: String = "0.00",
+    val rules: String = "",
+    val underMaintenance: Boolean = false,
     val photoProcessing: Boolean = false,
     val busy: Boolean = false,
     val deleteTarget: Space? = null,
@@ -64,6 +66,8 @@ class SpacesViewModel(private val useCases: SpacesUseCases) : ViewModel() {
             capacity = "",
             imageUrl = "",
             cost = "0.00",
+            rules = "",
+            underMaintenance = false,
             photoProcessing = false,
             formError = null,
             message = null,
@@ -79,6 +83,8 @@ class SpacesViewModel(private val useCases: SpacesUseCases) : ViewModel() {
             capacity = space.capacity?.toString().orEmpty(),
             imageUrl = space.imageUrl,
             cost = space.cost.toString(),
+            rules = space.rules,
+            underMaintenance = space.underMaintenance,
             photoProcessing = false,
             formError = null,
             message = null,
@@ -95,8 +101,13 @@ class SpacesViewModel(private val useCases: SpacesUseCases) : ViewModel() {
             "description" -> it.copy(description = value, formError = null)
             "capacity" -> it.copy(capacity = value, formError = null)
             "cost" -> it.copy(cost = value, formError = null)
+            "rules" -> it.copy(rules = value, formError = null)
             else -> it
         }
+    }
+
+    fun onUnderMaintenanceChange(value: Boolean) = _state.update {
+        it.copy(underMaintenance = value, formError = null)
     }
 
     fun onPhotoProcessing(value: Boolean) = _state.update { it.copy(photoProcessing = value) }
@@ -136,6 +147,8 @@ class SpacesViewModel(private val useCases: SpacesUseCases) : ViewModel() {
                         s.capacity,
                         s.imageUrl,
                         parsedCost,
+                        s.rules,
+                        s.underMaintenance,
                     )
                 } else {
                     useCases.add(
@@ -144,6 +157,8 @@ class SpacesViewModel(private val useCases: SpacesUseCases) : ViewModel() {
                         s.capacity,
                         s.imageUrl,
                         parsedCost,
+                        s.rules,
+                        s.underMaintenance,
                     )
                 }
 

@@ -19,6 +19,8 @@ interface SpacesRepository {
         capacity: Int?,
         imageUrl: String,
         cost: Double,
+        rules: String = "",
+        underMaintenance: Boolean = false,
     ): Space
 
     suspend fun update(
@@ -28,6 +30,8 @@ interface SpacesRepository {
         capacity: Int?,
         imageUrl: String?,
         cost: Double,
+        rules: String = "",
+        underMaintenance: Boolean = false,
     ): Space
 
     suspend fun remove(id: String)
