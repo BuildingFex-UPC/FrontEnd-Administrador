@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android Core App Quality (Network_Security_Configuration / Network_Security_Traffic):
+  toda la red debe viajar por SSL. El cleartext (HTTP) queda bloqueado por defecto
+  para todos los dominios; el backend y las imágenes usan HTTPS.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
