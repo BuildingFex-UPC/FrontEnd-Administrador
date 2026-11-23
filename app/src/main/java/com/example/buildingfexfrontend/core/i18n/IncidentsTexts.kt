@@ -40,4 +40,10 @@ val IncidentsTexts: Map<String, TextPair> = mapOf(
     "inc.msg.deleted" to ("Incidencia eliminada." to "Incident deleted."),
     "inc.msg.sent" to ("Incidencia enviada." to "Incident sent."),
     "inc.msg.updated" to ("Incidencia actualizada." to "Incident updated."),
+    "notif.title" to ("Notificaciones de incidentes" to "Incident notifications"),
+    "notif.empty" to ("No tienes notificaciones pendientes." to "No pending notifications."),
+    "notif.markAllRead" to ("Marcar todas como leídas" to "Mark all as read"),
+    "notif.newReported" to ("Nuevo incidente reportado" to "New incident reported"),
+    "notif.resolved" to ("Incidente resuelto" to "Incident resolved"),
+    "notif.close" to ("Cerrar" to "Close"),
 )

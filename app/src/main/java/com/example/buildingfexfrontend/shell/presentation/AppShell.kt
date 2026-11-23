@@ -23,10 +23,13 @@ import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.MeetingRoom
 import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.TrendingUp
 import androidx.compose.material.icons.outlined.Upload
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -44,8 +47,10 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -74,6 +79,7 @@ import com.example.buildingfexfrontend.finances.presentation.FinanceScreen
 import com.example.buildingfexfrontend.imports.presentation.ImportsScreen
 import com.example.buildingfexfrontend.incidents.presentation.AdminIncidentsScreen
 import com.example.buildingfexfrontend.information.presentation.InformationScreen
+import com.example.buildingfexfrontend.notifications.presentation.NotificationsDialog
 import com.example.buildingfexfrontend.residents.presentation.ResidentsScreen
 import com.example.buildingfexfrontend.settings.presentation.SettingsScreen
 import com.example.buildingfexfrontend.socialspaces.presentation.GenerationScreen
@@ -125,8 +131,18 @@ fun AppShell(container: AppContainer) {
     var selectedId by rememberSaveable { mutableStateOf(items.first().id) }
     val selected = items.firstOrNull { it.id == selectedId } ?: items.first()
 
+    var unreadNotifCount by remember { mutableIntStateOf(0) }
+    var showNotifs by remember { mutableStateOf(false) }
+
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(selectedId) {
+        try {
+            unreadNotifCount = container.notifications.getUnreadCount()
+        } catch (_: Throwable) {
+        }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -188,6 +204,22 @@ fun AppShell(container: AppContainer) {
                             Icon(Icons.Outlined.Menu, contentDescription = string("shell.openMenu"))
                         }
                     },
+                    actions = {
+                        IconButton(onClick = { showNotifs = true }) {
+                            BadgedBox(
+                                badge = {
+                                    if (unreadNotifCount > 0) {
+                                        Badge { Text(unreadNotifCount.toString()) }
+                                    }
+                                },
+                            ) {
+                                Icon(
+                                    Icons.Outlined.Notifications,
+                                    contentDescription = string("notif.title"),
+                                )
+                            }
+                        }
+                    },
                 )
             },
         ) { padding ->
@@ -208,6 +240,14 @@ fun AppShell(container: AppContainer) {
                 }
             }
         }
+    }
+
+    if (showNotifs) {
+        NotificationsDialog(
+            container = container,
+            onDismiss = { showNotifs = false },
+            onCountChanged = { unreadNotifCount = it },
+        )
     }
 }
 
