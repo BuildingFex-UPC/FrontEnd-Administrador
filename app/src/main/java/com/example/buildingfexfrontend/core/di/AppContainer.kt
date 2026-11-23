@@ -16,6 +16,8 @@ import com.example.buildingfexfrontend.imports.application.ImportsUseCases
 import com.example.buildingfexfrontend.imports.data.repository.ImportsRepositoryImpl
 import com.example.buildingfexfrontend.incidents.application.IncidentsUseCases
 import com.example.buildingfexfrontend.incidents.data.repository.IncidentsRepositoryImpl
+import com.example.buildingfexfrontend.notifications.application.NotificationsUseCases
+import com.example.buildingfexfrontend.notifications.data.repository.NotificationsRepositoryImpl
 import com.example.buildingfexfrontend.information.application.AnnouncementsUseCases
 import com.example.buildingfexfrontend.information.data.repository.AnnouncementsRepositoryImpl
 import com.example.buildingfexfrontend.residents.application.ResidentsUseCases
@@ -78,6 +80,10 @@ class AppContainer(context: Context) {
 
     val incidents: IncidentsUseCases by lazy {
         IncidentsUseCases(IncidentsRepositoryImpl(network.service(), session))
+    }
+
+    val notifications: NotificationsUseCases by lazy {
+        NotificationsUseCases(NotificationsRepositoryImpl(network.service(), session))
     }
 
     val announcements: AnnouncementsUseCases by lazy {
