@@ -38,4 +38,7 @@ val AuthTexts: Map<String, TextPair> = mapOf(
     "auth.error.name_required" to ("Ingresa tu nombre completo." to "Enter your full name."),
     "auth.error.invite_code_required" to ("Ingresa tu código de invitación." to "Enter your invitation code."),
     "auth.error.resident_not_found" to ("No encontramos residentes con el código \"{code}\". Revisa el mensaje de invitación." to "We couldn't find any residents with the code \"{code}\". Check the invitation message."),
+    "auth.terms.accept" to ("He leído y acepto los Términos y Condiciones" to "I have read and accept the Terms and Conditions"),
+    "auth.terms.read" to ("Leer términos y condiciones" to "Read terms and conditions"),
+    "auth.error.terms_required" to ("Debes aceptar los Términos y Condiciones para crear la cuenta." to "You must accept the Terms and Conditions to create the account."),
 )

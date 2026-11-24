@@ -19,6 +19,7 @@ val SettingsTexts: Map<String, TextPair> = mapOf(
     "set.profile.department" to ("Departamento" to "Department"),
     "set.profile.floor" to ("Piso" to "Floor"),
     "set.profile.edit" to ("Editar perfil" to "Edit profile"),
+    "set.terms.title" to ("Términos y Condiciones" to "Terms and Conditions"),
     "set.pw.change" to ("Cambiar contraseña" to "Change password"),
     "set.pw.title" to ("Cambiar contraseña" to "Change password"),
     "set.pw.new" to ("Nueva contraseña" to "New password"),
