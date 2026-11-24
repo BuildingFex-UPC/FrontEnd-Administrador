@@ -3,21 +3,30 @@ package com.example.buildingfexfrontend.iam.presentation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Apartment
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -27,6 +36,7 @@ import com.example.buildingfexfrontend.core.ui.appViewModel
 import com.example.buildingfexfrontend.core.ui.components.AppButton
 import com.example.buildingfexfrontend.core.ui.components.AppTextField
 import com.example.buildingfexfrontend.core.ui.components.FormError
+import com.example.buildingfexfrontend.core.ui.components.TermsDialog
 import com.example.buildingfexfrontend.core.ui.components.VerticalGap
 
 @Composable
@@ -109,6 +119,7 @@ private fun LoginForm(state: AuthUiState, viewModel: AuthViewModel) {
 
 @Composable
 private fun RegisterForm(state: AuthUiState, viewModel: AuthViewModel) {
+    var showTerms by rememberSaveable { mutableStateOf(false) }
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         AppTextField(
             value = state.regName,
@@ -146,12 +157,42 @@ private fun RegisterForm(state: AuthUiState, viewModel: AuthViewModel) {
             onValueChange = { viewModel.onRegFieldChange("ruc", it) },
             label = string("auth.field.ruc"),
         )
+        // Terms & Conditions acceptance: the register button stays disabled
+        // until the box is ticked; the document opens in an in-app dialog.
+        // Merging the descendants announces label + state as one node.
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics(mergeDescendants = true) {},
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Checkbox(
+                checked = state.regTermsAccepted,
+                onCheckedChange = viewModel::onRegTermsChange,
+            )
+            Text(
+                text = string("auth.terms.accept"),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 8.dp),
+            )
+        }
+        TextButton(
+            onClick = { showTerms = true },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(string("auth.terms.read"))
+        }
         state.error?.let { FormError(it) }
         VerticalGap(4)
         AppButton(
             text = string("auth.button.register"),
             onClick = viewModel::registerAdmin,
             loading = state.loading,
+            enabled = state.regTermsAccepted,
         )
+    }
+
+    if (showTerms) {
+        TermsDialog(onDismiss = { showTerms = false })
     }
 }

@@ -30,6 +30,7 @@ data class AuthUiState(
     val regAddress: String = "",
     val regCompany: String = "",
     val regRuc: String = "",
+    val regTermsAccepted: Boolean = false,
 )
 
 class AuthViewModel(private val auth: AuthUseCases) : ViewModel() {
@@ -62,6 +63,9 @@ class AuthViewModel(private val auth: AuthUseCases) : ViewModel() {
         }.copy(error = null)
     }
 
+    fun onRegTermsChange(accepted: Boolean) =
+        _state.update { it.copy(regTermsAccepted = accepted, error = null) }
+
     fun login() {
         val current = _state.value
         val emailError = if (!isValidEmail(current.email)) stringOf("auth.error.invalid_email") else null
@@ -80,13 +84,15 @@ class AuthViewModel(private val auth: AuthUseCases) : ViewModel() {
         val emailError = if (!isValidEmail(s.regEmail)) stringOf("auth.error.invalid_email") else null
         val passwordError = if (s.regPassword.length < 6) stringOf("auth.error.min_6") else null
         val nameError = if (s.regName.isBlank()) stringOf("auth.error.name_required") else null
-        if (emailError != null || passwordError != null || nameError != null) {
+        val termsError = if (!s.regTermsAccepted) stringOf("auth.error.terms_required") else null
+        if (emailError != null || passwordError != null || nameError != null || termsError != null) {
             _state.update { it.copy(error = null) }
             _state.update {
                 it.copy(
                     emailError = null,
                     passwordError = null,
-                    error = listOfNotNull(nameError, emailError, passwordError).joinToString(" "),
+                    error = listOfNotNull(nameError, emailError, passwordError, termsError)
+                        .joinToString(" "),
                 )
             }
             return

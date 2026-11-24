@@ -20,6 +20,7 @@ val ComponentsTexts: Map<String, TextPair> = mapOf(
     "ui.photoLabel" to ("Foto" to "Photo"),
     "ui.photoError" to ("No se pudo procesar la imagen. Intenta con otra foto." to "The image could not be processed. Try another photo."),
     "ui.checkout.title" to ("Pago con Mercado Pago" to "Mercado Pago payment"),
+    "ui.terms.title" to ("Términos y Condiciones" to "Terms and Conditions"),
     "ui.showPassword" to ("Mostrar contraseña" to "Show password"),
     "ui.hidePassword" to ("Ocultar contraseña" to "Hide password"),
 )

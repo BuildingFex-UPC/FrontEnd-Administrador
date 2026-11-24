@@ -13,6 +13,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +35,7 @@ import com.example.buildingfexfrontend.core.ui.components.KeyValue
 import com.example.buildingfexfrontend.core.ui.components.OutlinedCardBox
 import com.example.buildingfexfrontend.core.ui.components.SectionCard
 import com.example.buildingfexfrontend.core.ui.components.StatusChip
+import com.example.buildingfexfrontend.core.ui.components.TermsDialog
 import com.example.buildingfexfrontend.core.ui.components.VerticalGap
 import com.example.buildingfexfrontend.subscription.domain.model.SubscriptionPlan
 import com.example.buildingfexfrontend.ui.theme.BfSuccess
@@ -42,6 +47,7 @@ fun SettingsScreen(container: AppContainer) {
         SettingsViewModel(container.auth, container.subscription)
     }
     val state by viewModel.state.collectAsStateWithLifecycle()
+    var showTerms by rememberSaveable { mutableStateOf(false) }
 
     state.openCheckoutUrl?.let { checkoutUrl ->
         com.example.buildingfexfrontend.core.ui.components.CheckoutWebView(
@@ -99,6 +105,11 @@ fun SettingsScreen(container: AppContainer) {
                         AppOutlinedButton(
                             text = string("set.pw.change"),
                             onClick = viewModel::openChangePassword,
+                        )
+                        VerticalGap(8)
+                        AppOutlinedButton(
+                            text = string("set.terms.title"),
+                            onClick = { showTerms = true },
                         )
                     }
                 }
@@ -192,6 +203,11 @@ fun SettingsScreen(container: AppContainer) {
 
     if (state.showChangePassword) {
         ChangePasswordDialog(state = state, viewModel = viewModel)
+    }
+
+    // Terms & Conditions bundled with the app, readable at any time.
+    if (showTerms) {
+        TermsDialog(onDismiss = { showTerms = false })
     }
 }
 
